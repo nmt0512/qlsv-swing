@@ -193,7 +193,7 @@ public class PointController {
             List<String> listColumn = pointDao.getExcelListColumnName();
             try {
                 ExcelDao.exportPointDatabaseToExcel(listPoint, listColumn);
-                pointView.showMessage("Export thành công vào file -> D:/savedexcel/point/StudentDataSheet.xlsx");
+                pointView.showMessage("Export thành công vào file -> D:/savedexcel/point/PointDataSheet.xlsx");
             } catch (IOException ex) {
                 pointView.showMessage("Error writing file");
             } catch (SQLException ex) {
