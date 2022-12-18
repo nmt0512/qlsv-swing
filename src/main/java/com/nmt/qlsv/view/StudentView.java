@@ -3,6 +3,7 @@ package com.nmt.qlsv.view;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.util.List;
 
@@ -34,10 +35,12 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     private JLabel addressLabel;
     private JLabel classLabel;
     private JLabel classLabelBesideComboBox;
+    private JLabel searchLabel;
     private JTextField idField;
     private JTextField studentIdField;
     private JTextField nameField;
     private JTextField ageField;
+    private JTextField searchField;
     private JTextArea addressTA;
     private JComboBox<String> classComboBox;
     private JComboBox<String> classToUpdateComboBox;
@@ -75,6 +78,8 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         ageLabel = new JLabel("Age");
         addressLabel = new JLabel("Address");
         classLabel = new JLabel("Class");
+        searchLabel = new JLabel();
+        searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));
         classLabelBesideComboBox = new JLabel("Class");
         classLabelBesideComboBox.setForeground(Color.GRAY);
         
@@ -84,6 +89,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         studentIdField = new JTextField(6);
         nameField = new JTextField(15);
         ageField = new JTextField(6);
+        searchField = new JTextField(15);
         addressTA = new JTextArea();
         addressTA.setColumns(15);
         addressTA.setRows(5);
@@ -95,12 +101,12 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
 
         studentTable.setModel(new DefaultTableModel((Object[][]) data, columnNames));
         jScrollPaneStudentTable.setViewportView(studentTable);
-        jScrollPaneStudentTable.setPreferredSize(new Dimension (680, 300));
+        jScrollPaneStudentTable.setPreferredSize(new Dimension (680, 330));
 
         SpringLayout layout = new SpringLayout();
 
         JPanel panel = new JPanel();
-        panel.setSize(1000, 450);
+        panel.setSize(1000, 500);
         panel.setLayout(layout);
         panel.add(jScrollPaneStudentTable);
         
@@ -120,6 +126,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         panel.add(addressLabel);
         panel.add(classLabel);
         panel.add(classLabelBesideComboBox);
+        panel.add(searchLabel);
 
         panel.add(idField);
         panel.add(studentIdField);
@@ -127,6 +134,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         panel.add(ageField);
         panel.add(jScrollPaneAddress);
         panel.add(classToUpdateComboBox);
+        panel.add(searchField);
 
         panel.add(classComboBox);
 
@@ -134,6 +142,11 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         //NORTH: tinh tu ben tren
 
         // setup the location of all component on login view
+        layout.putConstraint(SpringLayout.NORTH, searchLabel, 3, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, searchLabel, 950, SpringLayout.WEST, panel);
+        layout.putConstraint(SpringLayout.NORTH, searchField, 5, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, searchField, 790, SpringLayout.WEST, panel);
+
         layout.putConstraint(SpringLayout.WEST, idLabel, 10, SpringLayout.WEST, panel);
         layout.putConstraint(SpringLayout.NORTH, idLabel, 10, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, studentIdLabel, 10, SpringLayout.WEST, panel);
@@ -161,7 +174,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         layout.putConstraint(SpringLayout.NORTH, classToUpdateComboBox, 230, SpringLayout.NORTH, panel);
         
         layout.putConstraint(SpringLayout.WEST, jScrollPaneStudentTable, 300, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, jScrollPaneStudentTable, 10, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, jScrollPaneStudentTable, 30, SpringLayout.NORTH, panel);
         
         layout.putConstraint(SpringLayout.WEST, addStudentBtn, 20, SpringLayout.WEST, panel);
         layout.putConstraint(SpringLayout.NORTH, addStudentBtn, 270, SpringLayout.NORTH, panel);
@@ -173,23 +186,23 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         layout.putConstraint(SpringLayout.WEST, clearBtn, 80, SpringLayout.WEST, deleteStudentBtn);
 
         layout.putConstraint(SpringLayout.WEST, sortStudentNameBtn, 559, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, sortStudentNameBtn, 330, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, 365, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, sortStudentNameBtn, 380, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, 415, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, chooseExcelFileBtn, 500, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, 365, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, 415, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, exportToExcelBtn, 618, SpringLayout.WEST, panel);
         layout.putConstraint(SpringLayout.WEST, showPointBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, showPointBtn, 365, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, showPointBtn, 415, SpringLayout.NORTH, panel);
 
         layout.putConstraint(SpringLayout.WEST, classLabelBesideComboBox, 880, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classLabelBesideComboBox, 323, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, classLabelBesideComboBox, 373, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, classComboBox, 920, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classComboBox, 320, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, classComboBox, 370, SpringLayout.NORTH, panel);
 
         this.add(panel);
         this.pack();
         this.setTitle("Student Information");
-        this.setSize(1000, 450);
+        this.setSize(1000, 500);
         // disable Edit and Delete buttons
         editStudentBtn.setEnabled(false);
         deleteStudentBtn.setEnabled(false);
@@ -302,6 +315,9 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     {
         return classComboBox.getSelectedItem().toString();
     }
+    public String getSearchedKey(){
+        return searchField.getText();
+    }
 
     private boolean validateStudentId() {
         String studentId = studentIdField.getText();
@@ -389,6 +405,10 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
 
     public void addShowPointListener(ActionListener listener) {
         showPointBtn.addActionListener(listener);
+    }
+    public void addSearchFieldListener(KeyListener keyListener)
+    {
+        searchField.addKeyListener(keyListener);
     }
 
     public void addListStudentSelectionListener(ListSelectionListener listener) {

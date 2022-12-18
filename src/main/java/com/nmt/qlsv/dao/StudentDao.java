@@ -10,9 +10,17 @@ import com.nmt.qlsv.entity.Student;
 
 public class StudentDao {
     private List<Student> listStudent;
+    private List<Student> listSearchedStudent;
 
     public StudentDao() {
         findAll();
+        this.listSearchedStudent = new ArrayList<>();
+    }
+    public List<Student> getListStudent() {
+        return this.listStudent;
+    }
+    public List<Student> getListSearchedStudent(){
+        return this.listSearchedStudent;
     }
 
     private PreparedStatement mapStudentToQuery(PreparedStatement statement, Student student) throws SQLException {
@@ -42,11 +50,6 @@ public class StudentDao {
         } catch (SQLException e1) {
             e1.printStackTrace();
         }
-    }
-
-
-    public List<Student> getListStudent() {
-        return this.listStudent;
     }
 
     public List<Student> findAll(String... classParam) {
@@ -148,6 +151,46 @@ public class StudentDao {
                         .compareTo(student2.getName().substring(lastIndexStudent2));
             }
         });
+    }
+
+    public List<Student> searchByNameOrStudentId(String key, String classKey)
+    {
+        this.listSearchedStudent = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        try {
+            con = ConnectionDao.getConnection();
+            String query = "SELECT * FROM Student WHERE (StudentId LIKE '%" + key +"%' OR Name LIKE '%" + key + "%')";
+            if(!classKey.equals("All"))
+                query += " AND Class = '" + classKey +"'";
+            statement = con.prepareStatement(query);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Student student = new Student();
+                student.setId(resultSet.getInt("Id"));
+                student.setStudentId(resultSet.getString("StudentId"));
+                student.setName(resultSet.getString("Name"));
+                student.setAge(resultSet.getInt("Age"));
+                student.setBirthday(resultSet.getTimestamp("Birthday"));
+                student.setStudentClass(resultSet.getString("Class"));
+                student.setAddress(resultSet.getString("Address"));
+                student.setHometown(resultSet.getString("Hometown"));
+                listSearchedStudent.add(student);
+            }
+            return listSearchedStudent;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                resultSet.close();
+                statement.close();
+                con.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return null;
     }
 
 }

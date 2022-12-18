@@ -2,6 +2,8 @@ package com.nmt.qlsv.controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -35,6 +37,7 @@ public class StudentController {
         view.addClassComboBoxListener(new ClassComboBoxListener());
         view.addExportToExcelListener(new ExportToExcelListener());
         view.addShowPointListener(new ShowPointListener());
+        view.addSearchFieldListener(new SearchFieldListener());
     }
 
     public void showStudentView() {
@@ -164,6 +167,27 @@ public class StudentController {
             pointController = new PointController(pointView);
             pointController.showPointListAndSubjectList();
             pointView.setVisible(true);
+        }
+    }
+
+    class SearchFieldListener implements KeyListener{
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+        }
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if(e.getKeyCode() == KeyEvent.VK_ENTER)
+            {
+                String key = studentView.getSearchedKey();
+                String classKey = studentView.getClassSelectedFromComboBox();
+                List<Student> listSearchedStudent = studentDao.searchByNameOrStudentId(key, classKey);
+                studentView.showListStudents(listSearchedStudent);
+            }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+
         }
     }
 }
