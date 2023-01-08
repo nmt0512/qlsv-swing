@@ -1,7 +1,6 @@
 package com.nmt.qlsv.dao;
 
-import com.nmt.qlsv.entity.Point;
-import com.nmt.qlsv.entity.Student;
+import com.nmt.qlsv.entity.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -12,12 +11,18 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.swing.*;
 import java.io.*;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ExcelDao {
-    public static void importStudentExcelToDatabase(String filePath) {
+    public void importStudentExcelToDatabase(String filePath) throws ParseException{
         String excelFilePath = filePath;
         try {
             Connection con = ConnectionDao.getConnection();
@@ -53,8 +58,8 @@ public class ExcelDao {
                             statement.setInt(3, age);
                             break;
                         case 3:
-                            Date birthday = nextCell.getDateCellValue();
-                            statement.setTimestamp(4, new Timestamp(birthday.getTime()));
+                            String birthday = nextCell.getStringCellValue();
+                            statement.setDate(4, stringToDate(birthday));
                             break;
                         case 4:
                             String clazz = nextCell.getStringCellValue();
@@ -85,7 +90,7 @@ public class ExcelDao {
         }
     }
 
-    public static void exportStudentDatabaseToExcel(List<Student> listStudent, List<String> listColumn)
+    public void exportStudentDatabaseToExcel(List<Student> listStudent, List<String> listColumn)
             throws IOException, SQLException {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
@@ -118,16 +123,16 @@ public class ExcelDao {
                         cell.setCellValue(student.getAge());
                         break;
                     case 4:
-                        cell.setCellValue(student.getBirthday());
+                        cell.setCellValue(dateToString(student.getBirthday()));
                         break;
                     case 5:
-                        cell.setCellValue(student.getStudentClass());
-                        break;
-                    case 6:
                         cell.setCellValue(student.getAddress());
                         break;
-                    case 7:
+                    case 6:
                         cell.setCellValue(student.getHometown());
+                        break;
+                    case 7:
+                        cell.setCellValue(student.getStudentClass());
                         break;
                 }
             }
@@ -138,7 +143,7 @@ public class ExcelDao {
         out.close();
     }
 
-    public static void importPointExcelToDatabase(String filePath) {
+    public void importPointExcelToDatabase(String filePath) {
         SubjectDao subjectDao = new SubjectDao();
         String excelFilePath = filePath;
         try {
@@ -211,7 +216,7 @@ public class ExcelDao {
         }
     }
 
-    public static void exportPointDatabaseToExcel(List<Point> listPoint, List<String> listColumn)
+    public void exportPointDatabaseToExcel(List<Point> listPoint, List<String> listColumn)
             throws IOException, SQLException {
         XSSFWorkbook workbook = new XSSFWorkbook();
 
@@ -228,7 +233,7 @@ public class ExcelDao {
         // writing the data into the sheets...
         for (Point point : listPoint) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < Student.class.getDeclaredFields().length; cellId ++) {
+            for (int cellId = 0; cellId < listColumn.size(); cellId ++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -259,5 +264,147 @@ public class ExcelDao {
         FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/point/PointDataSheet.xlsx"));
         workbook.write(out);
         out.close();
+    }
+
+    public void exportSubjectDatabaseToExcel(List<Subject> subjectList, List<String> columnList) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet(" Subject Data ");
+        XSSFRow row = spreadsheet.createRow(0);
+
+        for(int cellId = 0; cellId < columnList.size(); cellId ++)
+        {
+            Cell cellColumn = row.createCell(cellId);
+            cellColumn.setCellValue(columnList.get(cellId));
+        }
+
+        int rowid = 1;
+        // writing the data into the sheets...
+        for (Subject subject : subjectList) {
+            row = spreadsheet.createRow(rowid++);
+            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+                Cell cell = row.createCell(cellId);
+                switch (cellId) {
+                    case 0:
+                        cell.setCellValue(subject.getName());
+                        break;
+                    case 1:
+                        cell.setCellValue(subject.getCredit());
+                        break;
+                    case 2:
+                        cell.setCellValue(subject.getTeacherName());
+                        break;
+                }
+            }
+        }
+
+        FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/subject/SubjectDataSheet.xlsx"));
+        workbook.write(out);
+        out.close();
+    }
+
+    public void exportTeacherDatabaseToExcel(List<Teacher> teacherList, List<String> columnList) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet(" Teacher Data ");
+        XSSFRow row = spreadsheet.createRow(0);
+
+        for(int cellId = 0; cellId < columnList.size(); cellId ++)
+        {
+            Cell cellColumn = row.createCell(cellId);
+            cellColumn.setCellValue(columnList.get(cellId));
+        }
+
+        int rowid = 1;
+        // writing the data into the sheets...
+        for (Teacher teacher: teacherList) {
+            row = spreadsheet.createRow(rowid++);
+            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+                Cell cell = row.createCell(cellId);
+                switch (cellId) {
+                    case 0:
+                        cell.setCellValue(teacher.getName());
+                        break;
+                    case 1:
+                        cell.setCellValue(teacher.getAge());
+                        break;
+                    case 2:
+                        cell.setCellValue(teacher.getPhone());
+                        break;
+                    case 3:
+                        cell.setCellValue(teacher.getEmail());
+                        break;
+                    case 4:
+                        cell.setCellValue(teacher.getBirthday());
+                        break;
+                    case 5:
+                        cell.setCellValue(teacher.getStartWorking());
+                        break;
+                    case 6:
+                        cell.setCellValue(teacher.getHometown());
+                        break;
+                }
+            }
+        }
+
+        FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/teacher/TeacherDataSheet.xlsx"));
+        workbook.write(out);
+        out.close();
+    }
+
+    public void exportSessionDatabaseToExcel(List<Session> sessionList, List<String> columnList) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet(" Session Data ");
+        XSSFRow row = spreadsheet.createRow(0);
+
+        for(int cellId = 0; cellId < columnList.size(); cellId ++)
+        {
+            Cell cellColumn = row.createCell(cellId);
+            cellColumn.setCellValue(columnList.get(cellId));
+        }
+
+        int rowid = 1;
+        // writing the data into the sheets...
+        for (Session session: sessionList) {
+            row = spreadsheet.createRow(rowid++);
+            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+                Cell cell = row.createCell(cellId);
+                switch (cellId) {
+                    case 0:
+                        cell.setCellValue(session.getId());
+                        break;
+                    case 1:
+                        cell.setCellValue(session.getStartYear());
+                        break;
+                    case 2:
+                        cell.setCellValue(session.getEndYear());
+                        break;
+                    case 3:
+                        cell.setCellValue(session.getStuQuantity());
+                        break;
+                    case 4:
+                        cell.setCellValue(session.getTeacherName());
+                        break;
+                }
+            }
+        }
+
+        FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/session/SessionDataSheet.xlsx"));
+        workbook.write(out);
+        out.close();
+    }
+
+    private String dateToString(java.sql.Date date)
+    {
+        if(date != null)
+        {
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            return dateFormat.format(date);
+        }
+        return "";
+    }
+    private java.sql.Date stringToDate(String strDate) throws ParseException {
+        java.util.Date utilDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
+// because PreparedStatement#setDate(..) expects a java.sql.Date argument
+        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+        return sqlDate;
     }
 }

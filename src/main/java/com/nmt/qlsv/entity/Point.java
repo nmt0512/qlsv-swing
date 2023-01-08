@@ -12,9 +12,10 @@ public class Point {
     private Float pointFinal;
     private Float totalPoint;
     private Integer subjectId;
+    private String studentClass;
 
-    public Point(String studentId, String studentName, String subjectName,
-                 Float point1, Float point2, Float pointFinal, Float totalPoint, Integer subjectId) {
+    public Point(String studentId, String studentName, String subjectName, Float point1, Float point2,
+                 Float pointFinal, Float totalPoint, Integer subjectId, String studentClass) {
         this.studentId = studentId;
         this.studentName = studentName;
         this.subjectName = subjectName;
@@ -23,6 +24,7 @@ public class Point {
         this.pointFinal = pointFinal;
         this.totalPoint = totalPoint;
         this.subjectId = subjectId;
+        this.studentClass = studentClass;
     }
 
     public Point() {
@@ -90,6 +92,14 @@ public class Point {
 
     public void setSubjectId(Integer subjectId) {
         this.subjectId = subjectId;
+    }
+
+    public String getStudentClass() {
+        return studentClass;
+    }
+
+    public void setStudentClass(String studentClass) {
+        this.studentClass = studentClass;
     }
 
     public void calculateTotalPoint()

@@ -1,46 +1,69 @@
 package com.nmt.qlsv.controller;
 
+import com.nmt.qlsv.dao.ClazzDao;
+import com.nmt.qlsv.dao.ExcelDao;
+import com.nmt.qlsv.dao.StudentDao;
+import com.nmt.qlsv.entity.Clazz;
+import com.nmt.qlsv.entity.Student;
+import com.nmt.qlsv.view.StudentView;
+
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import com.nmt.qlsv.dao.ExcelDao;
-import com.nmt.qlsv.dao.StudentDao;
-import com.nmt.qlsv.view.PointView;
-import com.nmt.qlsv.view.StudentView;
-import com.nmt.qlsv.entity.Student;
 
 public class StudentController {
     private StudentDao studentDao;
     private StudentView studentView;
-    private PointView pointView;
-    private PointController pointController;
+    private ClazzDao clazzDao;
+    private ExcelDao excelDao;
 
-    public StudentController(StudentView view) {
-        this.studentView = view;
+    public StudentController() {
         studentDao = new StudentDao();
+        studentView = new StudentView();
+        clazzDao = new ClazzDao();
+        excelDao = new ExcelDao();
 
-        view.addAddStudentListener(new AddStudentListener());
-        view.addEdiStudentListener(new EditStudentListener());
-        view.addDeleteStudentListener(new DeleteStudentListener());
-        view.addClearListener(new ClearStudentListener());
-        view.addSortStudentNameListener(new SortStudentNameListener());
-        view.addListStudentSelectionListener(new ListStudentSelectionListener());
-        view.addChooseExcelFileListener(new ChooseExcelFileListener());
-        view.addClassComboBoxListener(new ClassComboBoxListener());
-        view.addExportToExcelListener(new ExportToExcelListener());
-        view.addShowPointListener(new ShowPointListener());
-        view.addSearchFieldListener(new SearchFieldListener());
+        studentView.addAddStudentListener(new AddStudentListener());
+        studentView.addEdiStudentListener(new EditStudentListener());
+        studentView.addDeleteStudentListener(new DeleteStudentListener());
+        studentView.addClearListener(new ClearStudentListener());
+        studentView.addSortStudentNameListener(new SortStudentNameListener());
+        studentView.addListStudentSelectionListener(new ListStudentSelectionListener());
+        studentView.addChooseExcelFileListener(new ChooseExcelFileListener());
+        studentView.addClassComboBoxListener(new ClassComboBoxListener());
+        studentView.addExportToExcelListener(new ExportToExcelListener());
+//        studentView.addShowPointListener(new ShowPointListener());
+        studentView.addSearchFieldListener(new SearchFieldListener());
+
+        setClassComboBoxData();
+        showStudentView();
     }
 
-    public void showStudentView() {
+    public StudentView getStudentView()
+    {
+        return studentView;
+    }
+
+    private void setClassComboBoxData()
+    {
+        List<Clazz> listClazz = clazzDao.findAll();
+        List<String> listClassName = new ArrayList<>();
+        for(Clazz clazz: listClazz)
+        {
+            listClassName.add(clazz.getName());
+        }
+        studentView.setDataForComboBox(listClassName);
+    }
+
+    private void showStudentView() {
         List<Student> studentList = studentDao.findAll();
         studentView.setVisible(true);
         studentView.showListStudents(studentList);
@@ -60,6 +83,7 @@ public class StudentController {
                 catch (SQLException e1)
                 {
                     studentView.showMessage("Lỗi khi thêm sinh viên: trùng mã sinh viên hoặc lỗi hệ thống");
+                    e1.printStackTrace();
                 }
             }
         }
@@ -128,9 +152,16 @@ public class StudentController {
             String filePath = studentView.chooseExcelFile();
             if(filePath != null)
             {
-                ExcelDao.importStudentExcelToDatabase(filePath);
-                studentView.showListStudents(studentDao.findAll());
-                studentView.showMessage("Import thành công");
+                try
+                {
+                    excelDao.importStudentExcelToDatabase(filePath);
+                    studentView.showListStudents(studentDao.findAll());
+                    studentView.showMessage("Import thành công");
+                }
+                catch (ParseException e1)
+                {
+                    studentView.showMessage("Error importing file");
+                }
             }
         }
     }
@@ -141,7 +172,7 @@ public class StudentController {
             List<Student> listStudent = studentDao.findAll();
             List<String> listColumn = studentDao.getListColumnName();
             try {
-                ExcelDao.exportStudentDatabaseToExcel(listStudent, listColumn);
+                excelDao.exportStudentDatabaseToExcel(listStudent, listColumn);
                 studentView.showMessage("Export thành công vào file -> D:/savedexcel/student/StudentDataSheet.xlsx");
             } catch (IOException ex) {
                 studentView.showMessage("Error writing file");
@@ -160,15 +191,13 @@ public class StudentController {
         }
     }
 
-    class ShowPointListener implements ActionListener {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            pointView = new PointView();
-            pointController = new PointController(pointView);
-            pointController.showPointListAndSubjectList();
-            pointView.setVisible(true);
-        }
-    }
+//    class ShowPointListener implements ActionListener {
+//        @Override
+//        public void actionPerformed(ActionEvent e) {
+//            pointController = new PointController();
+//            pointView.setVisible(true);
+//        }
+//    }
 
     class SearchFieldListener implements KeyListener{
         @Override

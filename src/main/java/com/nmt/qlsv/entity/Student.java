@@ -1,18 +1,18 @@
 package com.nmt.qlsv.entity;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 public class Student {
     private Integer id;
     private String studentId;
     private String name;
     private Integer age;
-    private Timestamp birthday;
+    private Date birthday;
     private String studentClass;
     private String address;
     private String hometown;
 
-    public Student(String studentId, String name, Integer age, Timestamp birthday,
+    public Student(String studentId, String name, Integer age, Date birthday,
                    String studentClass, String address, String hometown) {
         this.studentId = studentId;
         this.name = name;
@@ -57,11 +57,11 @@ public class Student {
         this.age = age;
     }
 
-    public Timestamp getBirthday() {
+    public Date getBirthday() {
         return birthday;
     }
 
-    public void setBirthday(Timestamp birthday) {
+    public void setBirthday(Date birthday) {
         this.birthday = birthday;
     }
 

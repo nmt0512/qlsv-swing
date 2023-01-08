@@ -3,7 +3,6 @@ package com.nmt.qlsv.view;
 import com.nmt.qlsv.entity.Point;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -11,13 +10,12 @@ import javax.swing.plaf.basic.ComboPopup;
 import javax.swing.plaf.metal.MetalComboBoxUI;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
-public class PointView extends JFrame implements ActionListener, ListSelectionListener {
+public class PointView extends JPanel {
     private JTable pointTable;
     private JScrollPane jScrollPanePointTable;
 
@@ -25,12 +23,16 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
     private JLabel point1Label;
     private JLabel point2Label;
     private JLabel pointFinalLabel;
-    private JLabel subjectLabelBesideComboBox;
+    private JLabel subjectLabel;
+    private JLabel subjectLabelUpdate;
+    private JLabel searchLabel;
+    private JLabel classLabel;
 
     private JTextField studentIdField;
     private JTextField point1Field;
     private JTextField point2Field;
     private JTextField pointFinalField;
+    private JTextField searchField;
 
     private JButton addPointBtn;
     private JButton editPointBtn;
@@ -40,12 +42,13 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
     private JButton sortByTotalPoint;
     private JButton chooseExcelFileBtn;
     private JButton exportToExcelBtn;
-    private List<String> subjectComboBoxData;
+//    private List<String> subjectComboBoxData;
     private JComboBox<String> subjectComboBox;
+    private JComboBox<String> subjectComboBoxUpdate;
+    private JComboBox<String> classComboBox;
     private Object data = new Object [][] {};
     private String [] columnNames = new String [] {"Student ID", "Name", "Subject Name", "Point 1"
-            , "Point 2", "Point Final", "Total Point"};
-
+            , "Point 2", "Point Final", "Total Point", "Class"};
 
     public PointView()
     {
@@ -58,15 +61,25 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
         point1Label = new JLabel("Point 1");
         point2Label = new JLabel("Point 2");
         pointFinalLabel = new JLabel("Point Final");
-        subjectLabelBesideComboBox = new JLabel("Subject");
-        subjectLabelBesideComboBox.setForeground(Color.GRAY);
+        subjectLabelUpdate = new JLabel("Subject");
+        subjectLabel = new JLabel("Subject");
+        subjectLabel.setForeground(Color.GRAY);
+        classLabel = new JLabel("Class");
+        classLabel.setForeground(Color.GRAY);
+
+        searchLabel = new JLabel();
+        searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));
 
         studentIdField = new JTextField(10);
         point1Field = new JTextField(6);
         point2Field = new JTextField(6);
         pointFinalField = new JTextField(6);
         subjectComboBox = new JComboBox<>();
+        searchField = new JTextField(15);
+        subjectComboBoxUpdate = new JComboBox<>();
         subjectComboBox.setUI(new PopUpMetalComboBoxUI());
+        classComboBox = new JComboBox<>();
+        classComboBox.setUI(new PopUpMetalComboBoxUI());
 
         addPointBtn = new JButton("Add");
         editPointBtn = new JButton("Edit");
@@ -79,100 +92,127 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
 
         jScrollPanePointTable = new JScrollPane();
 
-        subjectComboBoxData = new ArrayList<>();
+//        subjectComboBoxData = new ArrayList<>();
 
         pointTable = new JTable();
         pointTable.setModel(new DefaultTableModel((Object[][]) data, columnNames));
         jScrollPanePointTable.setViewportView(pointTable);
-        jScrollPanePointTable.setPreferredSize(new Dimension(680, 370));
+        jScrollPanePointTable.setPreferredSize(new Dimension (850, 700));
 
         SpringLayout layout = new SpringLayout();
-
-        JPanel panel = new JPanel();
-        panel.setSize(1000, 450);
-        panel.setLayout(layout);
-        panel.add(studentIdLabel);
-        panel.add(point1Label);
-        panel.add(point2Label);
-        panel.add(pointFinalLabel);
-        panel.add(subjectLabelBesideComboBox);
-
-        panel.add(studentIdField);
-        panel.add(point1Field);
-        panel.add(point2Field);
-        panel.add(pointFinalField);
-
-        panel.add(subjectComboBox);
         
-        panel.add(addPointBtn);
-        panel.add(editPointBtn);
-        panel.add(deletePointBtn);
-        panel.add(clearBtn);
-        panel.add(sortByNameBtn);
-        panel.add(sortByTotalPoint);
-        panel.add(chooseExcelFileBtn);
-        panel.add(exportToExcelBtn);
+        this.setLayout(layout);
+        this.add(studentIdLabel);
+        this.add(point1Label);
+        this.add(point2Label);
+        this.add(pointFinalLabel);
+        this.add(subjectLabel);
+        this.add(subjectLabelUpdate);
+        this.add(searchLabel);
+        this.add(classLabel);
 
-        panel.add(jScrollPanePointTable);
+        this.add(studentIdField);
+        this.add(point1Field);
+        this.add(point2Field);
+        this.add(pointFinalField);
+        this.add(searchField);
 
-        layout.putConstraint(SpringLayout.WEST, studentIdLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, studentIdLabel, 40, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, point1Label, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, point1Label, 70, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, point2Label, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, point2Label, 100, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, pointFinalLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, pointFinalLabel, 130, SpringLayout.NORTH, panel);
+        this.add(subjectComboBox);
+        this.add(subjectComboBoxUpdate);
+        this.add(classComboBox);
 
-        layout.putConstraint(SpringLayout.WEST, studentIdField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, studentIdField, 40, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, point1Field, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, point1Field, 70, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, point2Field, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, point2Field, 100, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, pointFinalField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, pointFinalField, 130, SpringLayout.NORTH, panel);
+        this.add(addPointBtn);
+        this.add(editPointBtn);
+        this.add(deletePointBtn);
+        this.add(clearBtn);
+        this.add(sortByNameBtn);
+        this.add(sortByTotalPoint);
+        this.add(chooseExcelFileBtn);
+        this.add(exportToExcelBtn);
 
-        layout.putConstraint(SpringLayout.WEST, addPointBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, addPointBtn, 180, SpringLayout.NORTH, panel);
+        this.add(jScrollPanePointTable);
+
+        int westSearchLabel = 1140;
+        layout.putConstraint(SpringLayout.NORTH, searchLabel, 6, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, searchLabel, westSearchLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, searchField, 8, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, searchField, westSearchLabel - 160, SpringLayout.WEST, this);
+
+        int westLabel = 40;
+        int northLabel = 70;
+        layout.putConstraint(SpringLayout.WEST, studentIdLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, studentIdLabel, northLabel, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, point1Label, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, point1Label, 30, SpringLayout.NORTH, studentIdLabel);
+        layout.putConstraint(SpringLayout.WEST, point2Label, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, point2Label, 30, SpringLayout.NORTH, point1Label);
+        layout.putConstraint(SpringLayout.WEST, pointFinalLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, pointFinalLabel, 30, SpringLayout.NORTH, point2Label);
+        layout.putConstraint(SpringLayout.WEST, subjectLabelUpdate, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, subjectLabelUpdate, 32, SpringLayout.NORTH, pointFinalLabel);
+
+        int westTextField = 130;
+        int northTextField = 70;
+        layout.putConstraint(SpringLayout.WEST, studentIdField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, studentIdField, northTextField, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, point1Field, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, point1Field, 30, SpringLayout.NORTH, studentIdField);
+        layout.putConstraint(SpringLayout.WEST, point2Field, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, point2Field, 30, SpringLayout.NORTH, point1Field);
+        layout.putConstraint(SpringLayout.WEST, pointFinalField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, pointFinalField, 30, SpringLayout.NORTH, point2Field);
+        layout.putConstraint(SpringLayout.WEST, subjectComboBoxUpdate, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, subjectComboBoxUpdate, 30, SpringLayout.NORTH, pointFinalField);
+
+        int westBtn = 40;
+        int northBtn = 240;
+        layout.putConstraint(SpringLayout.WEST, addPointBtn, westBtn, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, addPointBtn, northBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, editPointBtn, 60, SpringLayout.WEST, addPointBtn);
-        layout.putConstraint(SpringLayout.NORTH, editPointBtn, 180, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, editPointBtn, northBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, deletePointBtn, 60, SpringLayout.WEST, editPointBtn);
-        layout.putConstraint(SpringLayout.NORTH, deletePointBtn, 180, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, deletePointBtn, northBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, clearBtn, 80, SpringLayout.WEST, deletePointBtn);
-        layout.putConstraint(SpringLayout.NORTH, clearBtn, 180, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, clearBtn, northBtn, SpringLayout.NORTH, this);
 
-        layout.putConstraint(SpringLayout.WEST, jScrollPanePointTable, 300, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, jScrollPanePointTable, 10, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, jScrollPanePointTable, 330, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, jScrollPanePointTable, 50, SpringLayout.NORTH, this);
 
-        layout.putConstraint(SpringLayout.WEST, sortByNameBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, sortByNameBtn, 250, SpringLayout.NORTH, panel);
+        int westSortBtn = 40;
+        int northSortBtn = 310;
+        layout.putConstraint(SpringLayout.WEST, sortByNameBtn, westSortBtn, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, sortByNameBtn, northSortBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, sortByTotalPoint, 125, SpringLayout.WEST, sortByNameBtn);
-        layout.putConstraint(SpringLayout.NORTH, sortByTotalPoint, 250, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, sortByTotalPoint, northSortBtn, SpringLayout.NORTH, this);
 
-        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, 290, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, chooseExcelFileBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, 290, SpringLayout.NORTH, panel);
+        int westChooseExcel = 40;
+        int northChooseExcel = 350;
+        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, northChooseExcel, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, chooseExcelFileBtn, westChooseExcel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, northChooseExcel, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, exportToExcelBtn, 125, SpringLayout.WEST, sortByNameBtn);
 
-        layout.putConstraint(SpringLayout.WEST, subjectLabelBesideComboBox, 800, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, subjectLabelBesideComboBox, 387, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, subjectComboBox, 850, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, subjectComboBox, 384, SpringLayout.NORTH, panel);
+        int westSubjectLabelComboBox = 1000;
+        int northSubjectLabelComboBox = 770;
+        layout.putConstraint(SpringLayout.WEST, subjectLabel, westSubjectLabelComboBox, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, subjectLabel, northSubjectLabelComboBox, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, subjectComboBox, westSubjectLabelComboBox + 50, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, subjectComboBox, northSubjectLabelComboBox - 3, SpringLayout.NORTH, this);
+
+        int westClassLabelComboBox = 850;
+        int northClassLabelComboBox = 770;
+        layout.putConstraint(SpringLayout.WEST, classLabel, westClassLabelComboBox, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classLabel, northClassLabelComboBox, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, classComboBox, westClassLabelComboBox + 50, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classComboBox, northClassLabelComboBox - 3, SpringLayout.NORTH, this);
 
         editPointBtn.setEnabled(false);
         deletePointBtn.setEnabled(false);
         addPointBtn.setEnabled(true);
-        this.add(panel);
-        this.pack();
-        this.setTitle("Student Point");
-        this.setSize(1000, 450);
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
-
+        this.setSize(1140, 800);
     }
     public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
+        JOptionPane.showMessageDialog(null, message);
     }
 
     public String chooseExcelFile()
@@ -186,23 +226,40 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
         return null;
     }
 
+    public String getSearchedKey(){
+        return searchField.getText();
+    }
+
+    public String getClassComboBoxSelectedItem()
+    {
+        return classComboBox.getSelectedItem().toString();
+    }
+
     public String getSubjectComboBoxSelectedItem()
     {
         return subjectComboBox.getSelectedItem().toString();
     }
 
-    public void setDataSubjectComboBox(List<String> listSubjectName)
+    public void setSubjectComboBoxData(List<String> listSubjectName)
     {
         for(String name: listSubjectName)
         {
             subjectComboBox.addItem(name);
+            subjectComboBoxUpdate.addItem(name);
+        }
+    }
+
+    public void setClassComboBoxData(List<String> listClassName)
+    {
+        for(String name: listClassName)
+        {
+            classComboBox.addItem(name);
         }
     }
 
     public void showListPoint(List<Point> list) {
         int size = list.size();
-        // StudentTable: 5 columns
-        Object [][] point = new Object[size][7];
+        Object [][] point = new Object[size][8];
         for (int i = 0; i < size; i++) {
             point[i][0] = list.get(i).getStudentId();
             point[i][1] = list.get(i).getStudentName();
@@ -211,10 +268,11 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
             point[i][4] = list.get(i).getPoint2();
             point[i][5] = list.get(i).getPointFinal();
             point[i][6] = list.get(i).getTotalPoint();
+            point[i][7] = list.get(i).getStudentClass();
         }
         pointTable.setModel(new DefaultTableModel(point, columnNames));
-        pointTable.getColumnModel().getColumn(1).setPreferredWidth(150);
-        pointTable.getColumnModel().getColumn(2).setPreferredWidth(150);
+        pointTable.getColumnModel().getColumn(1).setPreferredWidth(160);
+        pointTable.getColumnModel().getColumn(2).setPreferredWidth(160);
     }
 
     public void fillFieldFromSelectedRow() {
@@ -228,7 +286,7 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
                 point2Field.setText(pointTable.getModel().getValueAt(row, 5).toString());
             if(pointTable.getModel().getValueAt(row, 6) != null)
                 pointFinalField.setText(pointTable.getModel().getValueAt(row, 6).toString());
-            subjectComboBox.setSelectedItem(pointTable.getModel().getValueAt(row, 2));
+            subjectComboBoxUpdate.setSelectedItem(pointTable.getModel().getValueAt(row, 2));
             editPointBtn.setEnabled(true);
             deletePointBtn.setEnabled(true);
             addPointBtn.setEnabled(false);
@@ -266,7 +324,7 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
         try {
             Point point = new Point();
             point.setStudentId(studentIdField.getText());
-            point.setSubjectName(subjectComboBox.getSelectedItem().toString());
+            point.setSubjectName(subjectComboBoxUpdate.getSelectedItem().toString());
             point.setPoint1(Float.parseFloat(point1Field.getText()));
             point.setPoint2(Float.parseFloat(point2Field.getText()));
             point.setPointFinal(Float.parseFloat(pointFinalField.getText()));
@@ -275,13 +333,6 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
             showMessage(e.getMessage());
         }
         return null;
-    }
-
-
-
-    public String getSubjectSelectedFromComboBox()
-    {
-        return subjectComboBox.getSelectedItem().toString();
     }
 
     private boolean validateStudentId() {
@@ -342,10 +393,6 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
         return true;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    }
-
     public void addAddPointListener(ActionListener listener)
     {
         addPointBtn.addActionListener(listener);
@@ -381,13 +428,17 @@ public class PointView extends JFrame implements ActionListener, ListSelectionLi
     {
         subjectComboBox.addActionListener(listener);
     }
+    public void addClassComboBoxListener(ActionListener listener)
+    {
+        classComboBox.addActionListener(listener);
+    }
     public void addChooseRowOnTableListener(ListSelectionListener listener)
     {
         this.pointTable.getSelectionModel().addListSelectionListener(listener);
     }
-
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
+    public void addSearchFieldListener(KeyListener keyListener)
+    {
+        searchField.addKeyListener(keyListener);
     }
 
     class PopUpMetalComboBoxUI extends MetalComboBoxUI {

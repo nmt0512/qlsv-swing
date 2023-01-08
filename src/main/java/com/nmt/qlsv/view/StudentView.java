@@ -1,21 +1,24 @@
 package com.nmt.qlsv.view;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
-import java.io.File;
-import java.util.List;
+import com.nmt.qlsv.entity.Student;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
+import java.io.File;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
-import com.nmt.qlsv.entity.Student;
-
-public class StudentView extends JFrame implements ActionListener, ListSelectionListener {
+public class StudentView extends JPanel implements ActionListener, ListSelectionListener {
     private static final long serialVersionUID = 1L;
     private JButton addStudentBtn;
     private JButton editStudentBtn;
@@ -24,7 +27,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     private JButton sortStudentNameBtn;
     private JButton chooseExcelFileBtn;
     private JButton exportToExcelBtn;
-    private JButton showPointBtn;
+//    private JButton showPointBtn;
     private JScrollPane jScrollPaneStudentTable;
     private JScrollPane jScrollPaneAddress;
     private JTable studentTable;
@@ -34,6 +37,8 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     private JLabel ageLabel;
     private JLabel addressLabel;
     private JLabel classLabel;
+    private JLabel birthdayLabel;
+    private JLabel hometownLabel;
     private JLabel classLabelBesideComboBox;
     private JLabel searchLabel;
     private JTextField idField;
@@ -43,21 +48,19 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     private JTextField searchField;
     private JTextArea addressTA;
     private JComboBox<String> classComboBox;
-    private JComboBox<String> classToUpdateComboBox;
-    
-    // define columns in student table
-    private String [] columnNames = new String [] {"ID", "Student ID", "Name", "Age", "Address", "Class"};
-    private String[] classComboBoxData = new String[] {"All", "CT4A", "CT4B", "CT4C", "CT4D"};
-    private String[] classToUpdateComboBoxData = new String[] {"", "CT4A", "CT4B", "CT4C", "CT4D"};
+    private JComboBox<String> classComboBoxToUpdate;
+    private JTextField birthdayField;
+    private JTextField hometownField;
 
+    // define columns in student table
+    private String [] columnNames = new String [] {"ID", "Student ID", "Name", "Age", "Address", "Class", "Birthday", "Hometown"};
     private Object data = new Object [][] {};
-    
+
     public StudentView() {
         initComponents();
     }
 
     private void initComponents() {
-        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         // init all the button
         addStudentBtn = new JButton("Add");
         editStudentBtn = new JButton("Edit");
@@ -66,7 +69,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         sortStudentNameBtn = new JButton("Sort By Name");
         chooseExcelFileBtn = new JButton("Import Excel");
         exportToExcelBtn = new JButton("Export Excel");
-        showPointBtn = new JButton("Show student point");
+//        showPointBtn = new JButton("Show student point");
         // init student table
         jScrollPaneStudentTable = new JScrollPane();
         studentTable = new JTable();
@@ -78,10 +81,15 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         ageLabel = new JLabel("Age");
         addressLabel = new JLabel("Address");
         classLabel = new JLabel("Class");
+        birthdayLabel = new JLabel("Birthday");
+        hometownLabel = new JLabel("Hometown");
         searchLabel = new JLabel();
         searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));
         classLabelBesideComboBox = new JLabel("Class");
         classLabelBesideComboBox.setForeground(Color.GRAY);
+
+        classComboBox = new JComboBox<>();
+        classComboBoxToUpdate = new JComboBox<>();
         
         // init text field for student information
         idField = new JTextField((6));
@@ -95,121 +103,153 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         addressTA.setRows(5);
         jScrollPaneAddress = new JScrollPane();
         jScrollPaneAddress.setViewportView(addressTA);
-
-        classComboBox = new JComboBox<>(classComboBoxData);
-        classToUpdateComboBox = new JComboBox<>(classToUpdateComboBoxData);
+        birthdayField = new JTextField(15);
+        hometownField = new JTextField(15);
 
         studentTable.setModel(new DefaultTableModel((Object[][]) data, columnNames));
         jScrollPaneStudentTable.setViewportView(studentTable);
-        jScrollPaneStudentTable.setPreferredSize(new Dimension (680, 330));
+        jScrollPaneStudentTable.setPreferredSize(new Dimension (850, 650));
 
         SpringLayout layout = new SpringLayout();
-
-        JPanel panel = new JPanel();
-        panel.setSize(1000, 500);
-        panel.setLayout(layout);
-        panel.add(jScrollPaneStudentTable);
         
-        panel.add(addStudentBtn);
-        panel.add(editStudentBtn);
-        panel.add(deleteStudentBtn);
-        panel.add(clearBtn);
-        panel.add(sortStudentNameBtn);
-        panel.add(chooseExcelFileBtn);
-        panel.add(exportToExcelBtn);
-        panel.add(showPointBtn);
+        this.setSize(1140, 800);
+        this.setLayout(layout);
+        this.add(jScrollPaneStudentTable);
+        
+        this.add(addStudentBtn);
+        this.add(editStudentBtn);
+        this.add(deleteStudentBtn);
+        this.add(clearBtn);
+        this.add(sortStudentNameBtn);
+        this.add(chooseExcelFileBtn);
+        this.add(exportToExcelBtn);
+//        this.add(showPointBtn);
 
-        panel.add(idLabel);
-        panel.add(studentIdLabel);
-        panel.add(nameLabel);
-        panel.add(ageLabel);
-        panel.add(addressLabel);
-        panel.add(classLabel);
-        panel.add(classLabelBesideComboBox);
-        panel.add(searchLabel);
+        this.add(idLabel);
+        this.add(studentIdLabel);
+        this.add(nameLabel);
+        this.add(ageLabel);
+        this.add(addressLabel);
+        this.add(classLabel);
+        this.add(classLabelBesideComboBox);
+        this.add(searchLabel);
+        this.add(birthdayLabel);
+        this.add(hometownLabel);
 
-        panel.add(idField);
-        panel.add(studentIdField);
-        panel.add(nameField);
-        panel.add(ageField);
-        panel.add(jScrollPaneAddress);
-        panel.add(classToUpdateComboBox);
-        panel.add(searchField);
+        this.add(idField);
+        this.add(studentIdField);
+        this.add(nameField);
+        this.add(ageField);
+        this.add(jScrollPaneAddress);
+        this.add(classComboBoxToUpdate);
+        this.add(searchField);
+        this.add(birthdayField);
+        this.add(hometownField);
 
-        panel.add(classComboBox);
+        this.add(classComboBox);
 
         //WEST: tinh tu ben trai
         //NORTH: tinh tu ben tren
 
         // setup the location of all component on login view
-        layout.putConstraint(SpringLayout.NORTH, searchLabel, 3, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, searchLabel, 950, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, searchField, 5, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, searchField, 790, SpringLayout.WEST, panel);
+        int westSearchLabel = 1140;
+        layout.putConstraint(SpringLayout.NORTH, searchLabel, 5, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, searchLabel, westSearchLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, searchField, 7, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, searchField, westSearchLabel - 160, SpringLayout.WEST, this);
 
-        layout.putConstraint(SpringLayout.WEST, idLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, idLabel, 10, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, studentIdLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, studentIdLabel, 40, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, nameLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, nameLabel, 70, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, ageLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, ageLabel, 100, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, addressLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, addressLabel, 130, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, classLabel, 10, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classLabel, 233, SpringLayout.NORTH, panel);
+        int westLabel = 40;
+        int westTextField = 130;
+        int northLabel = 50;
 
-        layout.putConstraint(SpringLayout.WEST, idField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, idField, 10, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, studentIdField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, studentIdField, 40, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, nameField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, nameField, 70, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, ageField, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, ageField, 100, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, jScrollPaneAddress, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, jScrollPaneAddress, 130, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, classToUpdateComboBox, 100, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classToUpdateComboBox, 230, SpringLayout.NORTH, panel);
+        int northClassLabel = 263;
+
+        layout.putConstraint(SpringLayout.WEST, idLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, idLabel, northLabel, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, studentIdLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, studentIdLabel, 30, SpringLayout.NORTH, idLabel);
+        layout.putConstraint(SpringLayout.WEST, nameLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, nameLabel, 30, SpringLayout.NORTH, studentIdLabel);
+        layout.putConstraint(SpringLayout.WEST, ageLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, ageLabel, 30, SpringLayout.NORTH, nameLabel);
+        layout.putConstraint(SpringLayout.WEST, addressLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, addressLabel, 30, SpringLayout.NORTH, ageLabel);
+        layout.putConstraint(SpringLayout.WEST, classLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classLabel, northClassLabel, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, birthdayLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, birthdayLabel, 30, SpringLayout.NORTH, classLabel);
+        layout.putConstraint(SpringLayout.WEST, hometownLabel, westLabel, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, hometownLabel, 30, SpringLayout.NORTH, birthdayLabel);
+
+        layout.putConstraint(SpringLayout.WEST, idField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, idField, northLabel, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, studentIdField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, studentIdField, 30, SpringLayout.NORTH, idField);
+        layout.putConstraint(SpringLayout.WEST, nameField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, nameField, 30, SpringLayout.NORTH, studentIdField);
+        layout.putConstraint(SpringLayout.WEST, ageField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, ageField, 30, SpringLayout.NORTH, nameField);
+        layout.putConstraint(SpringLayout.WEST, jScrollPaneAddress, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, jScrollPaneAddress, 30, SpringLayout.NORTH, ageField);
+        layout.putConstraint(SpringLayout.WEST, classComboBoxToUpdate, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classComboBoxToUpdate, northClassLabel - 3, SpringLayout.NORTH, this);
+
+        layout.putConstraint(SpringLayout.WEST, birthdayField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, birthdayField, 33, SpringLayout.NORTH, classComboBoxToUpdate);
+        layout.putConstraint(SpringLayout.WEST, hometownField, westTextField, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, hometownField, 30, SpringLayout.NORTH, birthdayField);
         
-        layout.putConstraint(SpringLayout.WEST, jScrollPaneStudentTable, 300, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, jScrollPaneStudentTable, 30, SpringLayout.NORTH, panel);
-        
-        layout.putConstraint(SpringLayout.WEST, addStudentBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, addStudentBtn, 270, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, jScrollPaneStudentTable, 330, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, jScrollPaneStudentTable, 45, SpringLayout.NORTH, this);
+
+        int westAddBtn = 50;
+        int northAddBtn = 390;
+        layout.putConstraint(SpringLayout.WEST, addStudentBtn, westAddBtn, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, addStudentBtn, northAddBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, editStudentBtn, 60, SpringLayout.WEST, addStudentBtn);
-        layout.putConstraint(SpringLayout.NORTH, editStudentBtn, 270, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, editStudentBtn, northAddBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, deleteStudentBtn, 60, SpringLayout.WEST, editStudentBtn);
-        layout.putConstraint(SpringLayout.NORTH, deleteStudentBtn, 270, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.NORTH, clearBtn, 270, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.NORTH, deleteStudentBtn, northAddBtn, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, clearBtn, 80, SpringLayout.WEST, deleteStudentBtn);
+        layout.putConstraint(SpringLayout.NORTH, clearBtn, northAddBtn, SpringLayout.NORTH, this);
 
-        layout.putConstraint(SpringLayout.WEST, sortStudentNameBtn, 559, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, sortStudentNameBtn, 380, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, 415, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, chooseExcelFileBtn, 500, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, 415, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, exportToExcelBtn, 618, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.WEST, showPointBtn, 20, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, showPointBtn, 415, SpringLayout.NORTH, panel);
+        int westSortNameBtn = 689;
+        int westChooseExcelBtn = 630;
+        int northSortNameBtn = 710;
+        int northChooseExcelBtn = 745;
+        layout.putConstraint(SpringLayout.WEST, sortStudentNameBtn, westSortNameBtn, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, sortStudentNameBtn, northSortNameBtn, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, chooseExcelFileBtn, westChooseExcelBtn, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, chooseExcelFileBtn, northChooseExcelBtn, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, northChooseExcelBtn, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, exportToExcelBtn, 118, SpringLayout.WEST, chooseExcelFileBtn);
+//        layout.putConstraint(SpringLayout.WEST, showPointBtn, 20, SpringLayout.WEST, this);
+//        layout.putConstraint(SpringLayout.NORTH, showPointBtn, 715, SpringLayout.NORTH, this);
 
-        layout.putConstraint(SpringLayout.WEST, classLabelBesideComboBox, 880, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classLabelBesideComboBox, 373, SpringLayout.NORTH, panel);
-        layout.putConstraint(SpringLayout.WEST, classComboBox, 920, SpringLayout.WEST, panel);
-        layout.putConstraint(SpringLayout.NORTH, classComboBox, 370, SpringLayout.NORTH, panel);
+        layout.putConstraint(SpringLayout.WEST, classLabelBesideComboBox, 1040, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classLabelBesideComboBox, 703, SpringLayout.NORTH, this);
+        layout.putConstraint(SpringLayout.WEST, classComboBox, 1080, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.NORTH, classComboBox, 700, SpringLayout.NORTH, this);
 
-        this.add(panel);
-        this.pack();
-        this.setTitle("Student Information");
-        this.setSize(1000, 500);
         // disable Edit and Delete buttons
         editStudentBtn.setEnabled(false);
         deleteStudentBtn.setEnabled(false);
         // enable Add button
         addStudentBtn.setEnabled(true);
-        this.setLocationRelativeTo(null);
-        this.setResizable(false);
+    }
+
+    public void setDataForComboBox(List<String> listClassName)
+    {
+        listClassName.add(0, "");
+        for(String className: listClassName)
+        {
+            classComboBoxToUpdate.addItem(className);
+        }
+        listClassName.set(0, "All");
+        for(String className: listClassName)
+        {
+            classComboBox.addItem(className);
+        }
     }
 
     public String chooseExcelFile()
@@ -224,12 +264,12 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     }
     
     public void showMessage(String message) {
-        JOptionPane.showMessageDialog(this, message);
+        JOptionPane.showMessageDialog(null, message);
     }
 
     public void showListStudents(List<Student> list) {
         int size = list.size();
-        Object [][] students = new Object[size][6];
+        Object [][] students = new Object[size][8];
         for (int i = 0; i < size; i++) {
             students[i][0] = list.get(i).getId();
             students[i][1] = list.get(i).getStudentId();
@@ -237,6 +277,8 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
             students[i][3] = list.get(i).getAge();
             students[i][4] = list.get(i).getAddress();
             students[i][5] = list.get(i).getStudentClass();
+            students[i][6] = dateToString(list.get(i).getBirthday());
+            students[i][7] = list.get(i).getHometown();
         }
         studentTable.setModel(new DefaultTableModel(students, columnNames));
         studentTable.getColumnModel().getColumn(2).setPreferredWidth(150);
@@ -254,7 +296,11 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
             if(studentTable.getModel().getValueAt(row, 4) != null)
                 addressTA.setText(studentTable.getModel().getValueAt(row, 4).toString());
             if(studentTable.getModel().getValueAt(row, 5) != null)
-                classToUpdateComboBox.setSelectedItem(studentTable.getModel().getValueAt(row, 5).toString());
+                classComboBoxToUpdate.setSelectedItem(studentTable.getModel().getValueAt(row, 5).toString());
+            if(studentTable.getModel().getValueAt(row, 6) != null)
+                birthdayField.setText(studentTable.getModel().getValueAt(row, 6).toString());
+            if(studentTable.getModel().getValueAt(row, 7) != null)
+                hometownField.setText(studentTable.getModel().getValueAt(row, 7).toString());
             // enable Edit and Delete buttons
             editStudentBtn.setEnabled(true);
             deleteStudentBtn.setEnabled(true);
@@ -269,7 +315,9 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         nameField.setText("");
         ageField.setText("");
         addressTA.setText("");
-        classToUpdateComboBox.setSelectedItem("");
+        classComboBoxToUpdate.setSelectedItem("");
+        birthdayField.setText("");
+        hometownField.setText("");
         // disable Edit and Delete buttons
         editStudentBtn.setEnabled(false);
         deleteStudentBtn.setEnabled(false);
@@ -278,11 +326,13 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
     }
 
     public void showStudentToTextField(Student student) {
-        studentIdField.setText("" + student.getStudentId());
+        studentIdField.setText(student.getStudentId());
         nameField.setText(student.getName());
         ageField.setText("" + student.getAge());
         addressTA.setText(student.getAddress());
-        classToUpdateComboBox.setSelectedItem(student.getStudentClass());
+        classComboBoxToUpdate.setSelectedItem(student.getStudentClass());
+        birthdayField.setText(dateToString(student.getBirthday()));
+        hometownField.setText(student.getHometown());
         // enable Edit and Delete buttons
         editStudentBtn.setEnabled(true);
         deleteStudentBtn.setEnabled(true);
@@ -292,7 +342,7 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
 
     public Student getStudentInfo() {
         // validate student
-        if (!validateStudentId() || !validateName() || !validateAge() || !validateAddress()) {
+        if (!validateStudentId() || !validateName() || !validateAge() || !validateAddress() || !validateBirthday()) {
             return null;
         }
         try {
@@ -303,7 +353,9 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
             student.setName(nameField.getText().trim());
             student.setAge(Integer.parseInt(ageField.getText()));
             student.setAddress(addressTA.getText().trim());
-            student.setStudentClass(classToUpdateComboBox.getSelectedItem().toString());
+            student.setStudentClass(classComboBoxToUpdate.getSelectedItem().toString());
+            student.setBirthday(stringToDate(birthdayField.getText()));
+            student.setHometown(hometownField.getText());
             return student;
         } catch (Exception e) {
             showMessage(e.getMessage());
@@ -364,7 +416,36 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         }
         return true;
     }
-    
+
+    private boolean validateBirthday() {
+            String date = birthdayField.getText();
+            String regex = "[0-3]\\d/[01]\\d/2\\d{3}";
+            if(date == null || "".equals(date.trim()) || !date.matches(regex))
+            {
+                birthdayField.requestFocus();
+                showMessage("Ngày sinh không hợp lệ, vui lòng nhập ngày sinh đúng dạng dd/MM/yyyy");
+                return false;
+            }
+            return true;
+    }
+
+    private Date stringToDate(String strDate) throws ParseException {
+        java.util.Date utilDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
+// because PreparedStatement#setDate(..) expects a java.sql.Date argument
+        java.sql.Date sqlDate = new java.sql.Date(utilDate.getTime());
+        return sqlDate;
+    }
+
+    private String dateToString(java.sql.Date date)
+    {
+        if(date != null)
+        {
+            DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            return dateFormat.format(date);
+        }
+        return "";
+    }
+
     public void actionPerformed(ActionEvent e) {
     }
     
@@ -403,9 +484,9 @@ public class StudentView extends JFrame implements ActionListener, ListSelection
         classComboBox.addActionListener(listener);
     }
 
-    public void addShowPointListener(ActionListener listener) {
-        showPointBtn.addActionListener(listener);
-    }
+//    public void addShowPointListener(ActionListener listener) {
+//        showPointBtn.addActionListener(listener);
+//    }
     public void addSearchFieldListener(KeyListener keyListener)
     {
         searchField.addKeyListener(keyListener);

@@ -27,7 +27,7 @@ public class StudentDao {
         statement.setString(1, student.getStudentId());
         statement.setString(2, student.getName());
         statement.setInt(3, student.getAge());
-        statement.setTimestamp(4, student.getBirthday());
+        statement.setDate(4, student.getBirthday());
         statement.setString(5, student.getStudentClass());
         statement.setString(6, student.getAddress());
         statement.setString(7, student.getHometown());
@@ -74,7 +74,7 @@ public class StudentDao {
                 student.setStudentId(resultSet.getString("StudentId"));
                 student.setName(resultSet.getString("Name"));
                 student.setAge(resultSet.getInt("Age"));
-                student.setBirthday(resultSet.getTimestamp("Birthday"));
+                student.setBirthday(resultSet.getDate("Birthday"));
                 student.setStudentClass(resultSet.getString("Class"));
                 student.setAddress(resultSet.getString("Address"));
                 student.setHometown(resultSet.getString("Hometown"));
@@ -93,6 +93,39 @@ public class StudentDao {
             }
         }
         return null;
+    }
+
+    public String findStudentClassByStudentId(String studentId)
+    {
+        Connection con = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        String result = null;
+        try
+        {
+            con = ConnectionDao.getConnection();
+            String query = "SELECT Class FROM Student WHERE StudentId = '"+ studentId +"'";
+            statement = con.prepareStatement(query);
+            resultSet = statement.executeQuery();
+            if(resultSet.next())
+            {
+                result = resultSet.getString("Class");
+            }
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                resultSet.close();
+                statement.close();
+                con.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return result;
     }
 
     public List<String> getListColumnName() {
@@ -172,7 +205,7 @@ public class StudentDao {
                 student.setStudentId(resultSet.getString("StudentId"));
                 student.setName(resultSet.getString("Name"));
                 student.setAge(resultSet.getInt("Age"));
-                student.setBirthday(resultSet.getTimestamp("Birthday"));
+                student.setBirthday(resultSet.getDate("Birthday"));
                 student.setStudentClass(resultSet.getString("Class"));
                 student.setAddress(resultSet.getString("Address"));
                 student.setHometown(resultSet.getString("Hometown"));

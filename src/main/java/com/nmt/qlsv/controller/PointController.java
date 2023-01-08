@@ -1,8 +1,7 @@
 package com.nmt.qlsv.controller;
 
-import com.nmt.qlsv.dao.ExcelDao;
-import com.nmt.qlsv.dao.PointDao;
-import com.nmt.qlsv.dao.SubjectDao;
+import com.nmt.qlsv.dao.*;
+import com.nmt.qlsv.entity.Clazz;
 import com.nmt.qlsv.entity.Point;
 import com.nmt.qlsv.entity.Subject;
 import com.nmt.qlsv.view.PointView;
@@ -11,6 +10,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,12 +21,20 @@ public class PointController {
     private PointDao pointDao;
     private PointView pointView;
     private SubjectDao subjectDao;
+    private ClazzDao clazzDao;
+    private StudentDao studentDao;
+    private ExcelDao excelDao;
 
-    public PointController(PointView pointView)
-    {
-        this.pointView = pointView;
+    public PointController() {
+        this.pointView = new PointView();
         pointDao = new PointDao();
         subjectDao = new SubjectDao();
+        clazzDao = new ClazzDao();
+        studentDao = new StudentDao();
+        excelDao = new ExcelDao();
+
+        showPointListAndDataComboBox();
+
         pointView.addChooseRowOnTableListener(new ChooseRowOnTableListener());
         pointView.addAddPointListener(new AddBtnListener());
         pointView.addEditPointListener(new EditBtnListener());
@@ -33,92 +42,94 @@ public class PointController {
         pointView.addClearPointListener(new ClearPointListener());
         pointView.addSortByTotalPoint(new SortPointByTotalPointListener());
         pointView.addSortByNameListener(new SortPointByNameListener());
-        pointView.addSubjectComboxBoxListener(new SubjectComboBoxListener());
+        pointView.addSubjectComboxBoxListener(new ClassAndSubjectComboBoxListener());
+        pointView.addClassComboBoxListener(new ClassAndSubjectComboBoxListener());
         pointView.addChooseExcelFileListener(new ChooseExcelFileListener());
         pointView.addExportExcelListener(new ExportExcelListener());
+        pointView.addSearchFieldListener(new SearchFieldListener());
     }
 
-    public void showPointListAndSubjectList()
-    {
-        List<Point> pointList = pointDao.findAll();
+    public PointView getPointView() {
+        return pointView;
+    }
+
+    private void showPointListAndDataComboBox() {
+        List<Point> pointList = pointDao.findAll(null, null);
         List<String> subjectName = new ArrayList<>();
+        List<String> clazzName = new ArrayList<>();
         subjectName.add("All");
+        clazzName.add("All");
         pointView.showListPoint(pointList);
-        for(Subject subject: subjectDao.findAll())
-        {
+
+        for (Subject subject : subjectDao.findAll()) {
             subjectName.add(subject.getName());
         }
-        pointView.setDataSubjectComboBox(subjectName);
+        pointView.setSubjectComboBoxData(subjectName);
+
+        for(Clazz clazz: clazzDao.findAll())
+        {
+            clazzName.add(clazz.getName());
+        }
+        pointView.setClassComboBoxData(clazzName);
     }
 
-    class AddBtnListener implements ActionListener{
+    class AddBtnListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             Point point = pointView.getPointInfo();
-            if(point != null)
-            {
-                if(point.getSubjectName().isBlank())
-                {
+            if (point != null) {
+                if (point.getSubjectName().isBlank()) {
                     pointView.showMessage("Vui lòng chọn tên môn học");
                 }
-                else
-                {
+                else {
                     point.setSubjectId(subjectDao.getSubjectIdBySubjectName(point.getSubjectName()));
                     point.calculateTotalPoint();
-                    try
-                    {
+                    try {
                         pointDao.addPoint(point);
                         pointView.showPointToTextField(point);
-                        pointView.showListPoint(pointDao.findAll());
+                        String studentClass = studentDao.findStudentClassByStudentId(point.getStudentId());
+                        pointView.showListPoint(pointDao.findAll(studentClass, null));
                         pointView.showMessage("Thêm thành công");
-                    }
-                    catch (SQLException e1)
-                    {
-                        pointView.showMessage("Sinh viên này đã có điểm môn " + point.getSubjectName());
+                    } catch (SQLException e1) {
+                        pointView.showMessage("Sinh viên không tồn tại hoặc đã có điểm môn " + point.getSubjectName());
                     }
                 }
             }
         }
     }
 
-    class EditBtnListener implements ActionListener{
+    class EditBtnListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             Point point = pointView.getPointInfo();
-            if(point != null)
-            {
+            if (point != null) {
                 point.setSubjectId(subjectDao.getSubjectIdBySubjectName(point.getSubjectName()));
                 point.calculateTotalPoint();
-                try
-                {
+                try {
                     pointDao.updatePoint(point);
                     pointView.showPointToTextField(point);
-                    pointView.showListPoint(pointDao.findAll());
+                    String studentClass = studentDao.findStudentClassByStudentId(point.getStudentId());
+                    pointView.showListPoint(pointDao.findAll(studentClass, null));
                     pointView.showMessage("Chỉnh sửa thành công");
-                }
-                catch (SQLException e1)
-                {
+                } catch (SQLException e1) {
                     pointView.showMessage("Lỗi khi cập nhật điểm sinh viên");
                 }
             }
         }
     }
 
-    class DeleteBtnListener implements ActionListener{
+    class DeleteBtnListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             Point point = pointView.getPointInfo();
-            if(point != null)
-            {
+            if (point != null) {
                 point.setSubjectId(subjectDao.getSubjectIdBySubjectName(point.getSubjectName()));
-                try
-                {
+                try {
                     pointDao.deletePoint(point);
                     pointView.clearPointInfo();
-                    pointView.showListPoint(pointDao.findAll());
+                    pointView.showListPoint(pointDao.findAll(null, null));
                     pointView.showMessage("Xóa thành công");
-                }
-                catch (SQLException e1) {
+                } catch (SQLException e1) {
                     pointView.showMessage("Lỗi khi cập nhật điểm sinh viên");
                 }
             }
@@ -132,14 +143,14 @@ public class PointController {
         }
     }
 
-    class ClearPointListener implements ActionListener{
+    class ClearPointListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             pointView.clearPointInfo();
         }
     }
 
-    class SortPointByNameListener implements ActionListener{
+    class SortPointByNameListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             pointDao.sortPointByName();
@@ -147,7 +158,7 @@ public class PointController {
         }
     }
 
-    class SortPointByTotalPointListener implements ActionListener{
+    class SortPointByTotalPointListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             pointDao.sortByTotalPoint();
@@ -155,44 +166,49 @@ public class PointController {
         }
     }
 
-    class SubjectComboBoxListener implements ActionListener{
+    class ClassAndSubjectComboBoxListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String subjectName = pointView.getSubjectComboBoxSelectedItem();
-            Integer subjectId = null;
-            subjectId = subjectDao.getSubjectIdBySubjectName(subjectName);
-            if(subjectId != null)
+            String className = pointView.getClassComboBoxSelectedItem();
+            Integer subjectId = subjectDao.getSubjectIdBySubjectName(subjectName);
+            if(className != "All" || subjectId != null)
             {
-                pointDao.findAll(subjectId);
+                if(className != "All" && subjectId != null)
+                    pointDao.findAll(className, subjectId);
+                else
+                {
+                    if(className != "All")
+                        pointDao.findAll(className, null);
+                    else
+                        pointDao.findAll(null, subjectId);
+                }
             }
             else
-            {
-                pointDao.findAll();
-            }
+                pointDao.findAll(null, null);
             pointView.showListPoint(pointDao.getPointList());
         }
     }
 
-    class ChooseExcelFileListener implements ActionListener{
+    class ChooseExcelFileListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             String filePath = pointView.chooseExcelFile();
-            if(filePath != null)
-            {
-                ExcelDao.importPointExcelToDatabase(filePath);
-                pointView.showListPoint(pointDao.findAll());
+            if (filePath != null) {
+                excelDao.importPointExcelToDatabase(filePath);
+                pointView.showListPoint(pointDao.findAll(null, null));
                 pointView.showMessage("Import thành công");
             }
         }
     }
 
-    class ExportExcelListener implements ActionListener{
+    class ExportExcelListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            List<Point> listPoint = pointDao.findAll();
+            List<Point> listPoint = pointDao.findAll(null, null);
             List<String> listColumn = pointDao.getExcelListColumnName();
             try {
-                ExcelDao.exportPointDatabaseToExcel(listPoint, listColumn);
+                excelDao.exportPointDatabaseToExcel(listPoint, listColumn);
                 pointView.showMessage("Export thành công vào file -> D:/savedexcel/point/PointDataSheet.xlsx");
             } catch (IOException ex) {
                 pointView.showMessage("Error writing file");
@@ -202,4 +218,22 @@ public class PointController {
         }
     }
 
+    class SearchFieldListener implements KeyListener {
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+        @Override
+        public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                String key = pointView.getSearchedKey();
+                String classKey = pointView.getClassComboBoxSelectedItem();
+                String subjectKey = pointView.getSubjectComboBoxSelectedItem();
+                List<Point> searchedPointList = pointDao.searchByNameOrStudentId(key, classKey, subjectKey);
+                pointView.showListPoint(searchedPointList);
+            }
+        }
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
+    }
 }

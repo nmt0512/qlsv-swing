@@ -3,10 +3,14 @@ package com.nmt.qlsv.dao;
 import com.nmt.qlsv.entity.Point;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class PointDao {
     private List<Point> pointList;
+    private List<Point> searchedPointList;
 
     public PointDao() {
         this.pointList = new ArrayList<>();
@@ -31,13 +35,13 @@ public class PointDao {
         return pointList;
     }
 
-    private void save(String query, Boolean updateFunction, Point... points) throws SQLException {
+    private void save(String query, Boolean updateFlag, Point... points) throws SQLException {
         Connection con = null;
         PreparedStatement statement = null;
         con = ConnectionDao.getConnection();
         statement = con.prepareStatement(query);
         if (points != null)
-            statement = mapPointToQuery(statement, updateFunction, points[0]);
+            statement = mapPointToQuery(statement, updateFlag, points[0]);
         statement.executeUpdate();
         try {
             statement.close();
@@ -65,7 +69,7 @@ public class PointDao {
         save(query, false, null);
     }
 
-    public List<Point> findAll(Integer... subjectId) {
+    public List<Point> findAll(String studentClass, Integer subjectId) {
         this.pointList = new ArrayList<>();
         Connection con = null;
         PreparedStatement statement = null;
@@ -73,17 +77,29 @@ public class PointDao {
         try {
             con = ConnectionDao.getConnection();
             String query = "SELECT stu.StudentId, stu.Name, sub.Name SubjectName, p.Point1, p.Point2, p.PointFinal, p.TotalPoint, " +
-                    "sub.Id SubjectId FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
+                    "sub.Id SubjectId, stu.Class StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
                     "JOIN Subject sub ON p.SubjectId = sub.Id";
-            if(subjectId.length != 0 && subjectId[0] != null)
-                query += " WHERE sub.Id = " + subjectId[0];
+            if(studentClass != null || subjectId != null)
+            {
+                query += " WHERE ";
+                if(studentClass != null && subjectId != null)
+                    query += "stu.Class = '"+ studentClass +"' AND SubjectId = "+ subjectId;
+                else
+                {
+                    if(studentClass != null)
+                        query += "stu.Class = '"+ studentClass +"'";
+                    else
+                        query += "SubjectId = "+ subjectId;
+                }
+            }
             statement = con.prepareStatement(query);
             rs = statement.executeQuery();
             while (rs.next()) {
                 Point point = new Point(rs.getString("StudentId"), rs.getString("Name"),
                         rs.getString("SubjectName"), rs.getFloat("Point1"),
                         rs.getFloat("Point2"), rs.getFloat("PointFinal"),
-                        rs.getFloat("TotalPoint"), rs.getInt("SubjectId"));
+                        rs.getFloat("TotalPoint"), rs.getInt("SubjectId"),
+                        rs.getString("StudentClass"));
                 pointList.add(point);
             }
         } catch (SQLException e) {
@@ -151,5 +167,49 @@ public class PointDao {
                 return -1;
             }
         });
+    }
+
+    public List<Point> searchByNameOrStudentId(String key, String classKey, String subjectKey)
+    {
+        this.searchedPointList = new ArrayList<>();
+        Connection con = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            con = ConnectionDao.getConnection();
+            String query = "SELECT stu.StudentId, stu.Name, sub.Name SubjectName, p.Point1, p.Point2, p.PointFinal, p.TotalPoint, " +
+                    "sub.Id SubjectId, stu.Class StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
+                    "JOIN Subject sub ON p.SubjectId = sub.Id WHERE (stu.StudentId LIKE '%" + key +"%' OR stu.Name LIKE '%" + key + "%')";
+            if(!classKey.equals("All"))
+            {
+                query += " AND stu.Class = '"+ classKey +"'";
+            }
+            if(!subjectKey.equals("All"))
+            {
+                query += " AND sub.Name = '"+ subjectKey +"'";
+            }
+            statement = con.prepareStatement(query);
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                Point point = new Point(rs.getString("StudentId"), rs.getString("Name"),
+                        rs.getString("SubjectName"), rs.getFloat("Point1"),
+                        rs.getFloat("Point2"), rs.getFloat("PointFinal"),
+                        rs.getFloat("TotalPoint"), rs.getInt("SubjectId"),
+                        rs.getString("StudentClass"));
+                searchedPointList.add(point);
+            }
+            return searchedPointList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                rs.close();
+                statement.close();
+                con.close();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+        }
+        return null;
     }
 }

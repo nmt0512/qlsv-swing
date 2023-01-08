@@ -2,6 +2,7 @@ package com.nmt.qlsv.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 
 import javax.swing.*;
 
@@ -78,5 +79,9 @@ public class LoginView extends JFrame implements ActionListener {
     
     public void addLoginListener(ActionListener listener) {
         loginBtn.addActionListener(listener);
+    }
+    public void addPasswordFieldEnterListener(KeyListener listener)
+    {
+        passwordField.addKeyListener(listener);
     }
 }
