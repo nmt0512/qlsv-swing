@@ -33,7 +33,8 @@ public class PointController {
         studentDao = new StudentDao();
         excelDao = new ExcelDao();
 
-        showPointListAndDataComboBox();
+        showPointList();
+        setClassAndSubjectComboBoxData();
 
         pointView.addChooseRowOnTableListener(new ChooseRowOnTableListener());
         pointView.addAddPointListener(new AddBtnListener());
@@ -53,13 +54,15 @@ public class PointController {
         return pointView;
     }
 
-    private void showPointListAndDataComboBox() {
+    public void showPointList() {
         List<Point> pointList = pointDao.findAll(null, null);
+        pointView.showListPoint(pointList);
+    }
+
+    public void setClassAndSubjectComboBoxData()
+    {
         List<String> subjectName = new ArrayList<>();
         List<String> clazzName = new ArrayList<>();
-        subjectName.add("All");
-        clazzName.add("All");
-        pointView.showListPoint(pointList);
 
         for (Subject subject : subjectDao.findAll()) {
             subjectName.add(subject.getName());
@@ -85,9 +88,9 @@ public class PointController {
                     point.setSubjectId(subjectDao.getSubjectIdBySubjectName(point.getSubjectName()));
                     point.calculateTotalPoint();
                     try {
-                        pointDao.addPoint(point);
+                        pointDao.save(point, false);
                         pointView.showPointToTextField(point);
-                        String studentClass = studentDao.findStudentClassByStudentId(point.getStudentId());
+                        String studentClass = studentDao.findClassNameByStudentId(point.getStudentId());
                         pointView.showListPoint(pointDao.findAll(studentClass, null));
                         pointView.showMessage("Thêm thành công");
                     } catch (SQLException e1) {
@@ -106,9 +109,9 @@ public class PointController {
                 point.setSubjectId(subjectDao.getSubjectIdBySubjectName(point.getSubjectName()));
                 point.calculateTotalPoint();
                 try {
-                    pointDao.updatePoint(point);
+                    pointDao.save(point, true);
                     pointView.showPointToTextField(point);
-                    String studentClass = studentDao.findStudentClassByStudentId(point.getStudentId());
+                    String studentClass = studentDao.findClassNameByStudentId(point.getStudentId());
                     pointView.showListPoint(pointDao.findAll(studentClass, null));
                     pointView.showMessage("Chỉnh sửa thành công");
                 } catch (SQLException e1) {
@@ -130,7 +133,7 @@ public class PointController {
                     pointView.showListPoint(pointDao.findAll(null, null));
                     pointView.showMessage("Xóa thành công");
                 } catch (SQLException e1) {
-                    pointView.showMessage("Lỗi khi cập nhật điểm sinh viên");
+                    pointView.showMessage("Lỗi khi xóa điểm sinh viên");
                 }
             }
         }
@@ -171,22 +174,25 @@ public class PointController {
         public void actionPerformed(ActionEvent e) {
             String subjectName = pointView.getSubjectComboBoxSelectedItem();
             String className = pointView.getClassComboBoxSelectedItem();
-            Integer subjectId = subjectDao.getSubjectIdBySubjectName(subjectName);
-            if(className != "All" || subjectId != null)
+            if(subjectName != null && className != null)
             {
-                if(className != "All" && subjectId != null)
-                    pointDao.findAll(className, subjectId);
-                else
+                Integer subjectId = subjectDao.getSubjectIdBySubjectName(subjectName);
+                if(className != "All" || subjectId != null)
                 {
-                    if(className != "All")
-                        pointDao.findAll(className, null);
+                    if(className != "All" && subjectId != null)
+                        pointDao.findAll(className, subjectId);
                     else
-                        pointDao.findAll(null, subjectId);
+                    {
+                        if(className != "All")
+                            pointDao.findAll(className, null);
+                        else
+                            pointDao.findAll(null, subjectId);
+                    }
                 }
+                else
+                    pointDao.findAll(null, null);
+                pointView.showListPoint(pointDao.getPointList());
             }
-            else
-                pointDao.findAll(null, null);
-            pointView.showListPoint(pointDao.getPointList());
         }
     }
 

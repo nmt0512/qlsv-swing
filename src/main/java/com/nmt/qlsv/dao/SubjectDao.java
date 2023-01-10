@@ -97,7 +97,7 @@ public class SubjectDao {
             con = ConnectionDao.getConnection();
             String query = "SELECT sub.Id, sub.Name, sub.Credit, sub.TeacherId, tea.Name TeacherName " +
                     "FROM Subject sub JOIN Teacher tea ON sub.TeacherId = tea.Id " +
-                    "WHERE sub.Name LIKE '%" + key + "%'";
+                    "WHERE sub.Name LIKE N'%" + key + "%'";
             statement = con.prepareStatement(query);
             rs = statement.executeQuery();
             while (rs.next()) {

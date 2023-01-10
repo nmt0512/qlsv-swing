@@ -14,6 +14,11 @@ public class SessionDao {
         sessionList = new ArrayList<>();
     }
 
+    public List<Session> getSessionList()
+    {
+        return sessionList;
+    }
+
     public List<Session> findAll()
     {
         sessionList = new ArrayList<>();
@@ -53,7 +58,7 @@ public class SessionDao {
         return null;
     }
 
-    public void save(Session session) throws SQLException {
+    public void save(Session session) throws SQLException, NullPointerException {
         Connection con = ConnectionDao.getConnection();
         PreparedStatement statement;
         ResultSet resultSet;
@@ -97,6 +102,26 @@ public class SessionDao {
         String query = "DELETE FROM Session WHERE Id = ?";
         PreparedStatement statement = con.prepareStatement(query);
         statement.setInt(1, id);
+        statement.executeUpdate();
+        statement.close();
+        con.close();
+    }
+
+    public void updateStuQuantityBySessionId(Integer sessionId, Boolean addStuQuantity) throws SQLException, NullPointerException {
+        Integer oldQuantity = null;
+        for(Session session: sessionList)
+        {
+            if(session.getId() == sessionId)
+                oldQuantity = session.getStuQuantity();
+        }
+        Connection con = ConnectionDao.getConnection();
+        String query = "UPDATE Session SET StuQuantity = ? WHERE Id = ?";
+        PreparedStatement statement = con.prepareStatement(query);
+        if(addStuQuantity)
+            statement.setInt(1, oldQuantity + 1);
+        else
+            statement.setInt(1, oldQuantity - 1);
+        statement.setInt(2, sessionId);
         statement.executeUpdate();
         statement.close();
         con.close();

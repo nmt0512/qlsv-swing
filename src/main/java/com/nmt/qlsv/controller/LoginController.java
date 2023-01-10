@@ -1,19 +1,17 @@
 package com.nmt.qlsv.controller;
 
+import com.nmt.qlsv.dao.UserDao;
+import com.nmt.qlsv.entity.User;
+import com.nmt.qlsv.view.LoginView;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-import com.nmt.qlsv.dao.UserDao;
-import com.nmt.qlsv.view.LoginView;
-import com.nmt.qlsv.view.HomeView;
-import com.nmt.qlsv.entity.User;
-
 public class LoginController {
     private UserDao userDao;
     private LoginView loginView;
-    private HomeView homeView;
     
     public LoginController(LoginView view) {
         this.loginView = view;

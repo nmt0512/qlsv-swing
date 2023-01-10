@@ -8,20 +8,23 @@ public class Student {
     private String name;
     private Integer age;
     private Date birthday;
-    private String studentClass;
     private String address;
     private String hometown;
+    private Integer classId;
+    private String className;
 
     public Student(String studentId, String name, Integer age, Date birthday,
-                   String studentClass, String address, String hometown) {
+                   String address, String hometown, Integer classId, String className) {
         this.studentId = studentId;
         this.name = name;
         this.age = age;
         this.birthday = birthday;
-        this.studentClass = studentClass;
         this.address = address;
         this.hometown = hometown;
+        this.classId = classId;
+        this.className = className;
     }
+
     public Student() {
     }
 
@@ -37,8 +40,8 @@ public class Student {
         return studentId;
     }
 
-    public void setStudentId(String stuId) {
-        this.studentId = stuId;
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
     }
 
     public String getName() {
@@ -65,14 +68,6 @@ public class Student {
         this.birthday = birthday;
     }
 
-    public String getStudentClass() {
-        return studentClass;
-    }
-
-    public void setStudentClass(String studentClass) {
-        this.studentClass = studentClass;
-    }
-
     public String getAddress() {
         return address;
     }
@@ -89,4 +84,19 @@ public class Student {
         this.hometown = hometown;
     }
 
+    public Integer getClassId() {
+        return classId;
+    }
+
+    public void setClassId(Integer classId) {
+        this.classId = classId;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
 }

@@ -16,57 +16,48 @@ public class PointDao {
         this.pointList = new ArrayList<>();
     }
 
-    private PreparedStatement mapPointToQuery(PreparedStatement statement, Boolean updateFlag, Point point)
+    private void executeUpdate(PreparedStatement statement, Point point)
             throws SQLException {
-        statement.setString(1, point.getStudentId());
-        statement.setInt(2, point.getSubjectId());
-        statement.setFloat(3, point.getPoint1());
-        statement.setFloat(4, point.getPoint2());
-        statement.setFloat(5, point.getPointFinal());
-        statement.setFloat(6, point.getTotalPoint());
-        if (updateFlag) {
-            statement.setString(7, point.getStudentId());
-            statement.setInt(8, point.getSubjectId());
-        }
-        return statement;
+        statement.setFloat(1, point.getPoint1());
+        statement.setFloat(2, point.getPoint2());
+        statement.setFloat(3, point.getPointFinal());
+        statement.setFloat(4, point.getTotalPoint());
+        statement.setString(5, point.getStudentId());
+        statement.setInt(6, point.getSubjectId());
+        statement.executeUpdate();
     }
 
     public List<Point> getPointList() {
         return pointList;
     }
 
-    private void save(String query, Boolean updateFlag, Point... points) throws SQLException {
+    public void save(Point point, Boolean isUpdatingProcess) throws SQLException {
         Connection con = null;
         PreparedStatement statement = null;
+        String query;
         con = ConnectionDao.getConnection();
+        if (!isUpdatingProcess)
+            query = "INSERT INTO Point(Point1, Point2, PointFinal, TotalPoint, StudentId, SubjectId) " +
+                    "VALUES(?, ?, ? ,?, ?, ?)";
+        else
+            query = "UPDATE Point SET Point1 = ?, Point2 = ?, PointFinal = ?, " +
+                    "TotalPoint = ? WHERE StudentId = ? AND SubjectId = ?";
         statement = con.prepareStatement(query);
-        if (points != null)
-            statement = mapPointToQuery(statement, updateFlag, points[0]);
-        statement.executeUpdate();
-        try {
-            statement.close();
-            con.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addPoint(Point point) throws SQLException {
-        String query = "INSERT INTO Point(StudentId, SubjectId, Point1, Point2, PointFinal, TotalPoint) " +
-                "VALUES(?, ?, ? ,?, ?, ?)";
-        save(query, false, point);
-    }
-
-    public void updatePoint(Point point) throws SQLException {
-        String query = "UPDATE Point SET StudentId = ?, SubjectId = ?, Point1 = ?, Point2 = ?, PointFinal = ?, " +
-                "TotalPoint = ? WHERE StudentId = ? AND SubjectId = ?";
-        save(query, true, point);
+        executeUpdate(statement, point);
+        statement.close();
+        con.close();
     }
 
     public void deletePoint(Point point) throws SQLException {
+        Connection con = null;
+        PreparedStatement statement = null;
+        con = ConnectionDao.getConnection();
         String query = "DELETE FROM Point WHERE StudentId = '" + point.getStudentId()
                 + "' AND SubjectId = " + point.getSubjectId();
-        save(query, false, null);
+        statement = con.prepareStatement(query);
+        statement.executeUpdate();
+        statement.close();
+        con.close();
     }
 
     public List<Point> findAll(String studentClass, Integer subjectId) {
@@ -77,19 +68,17 @@ public class PointDao {
         try {
             con = ConnectionDao.getConnection();
             String query = "SELECT stu.StudentId, stu.Name, sub.Name SubjectName, p.Point1, p.Point2, p.PointFinal, p.TotalPoint, " +
-                    "sub.Id SubjectId, stu.Class StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
-                    "JOIN Subject sub ON p.SubjectId = sub.Id";
-            if(studentClass != null || subjectId != null)
-            {
+                    "sub.Id SubjectId, cla.Name StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
+                    "JOIN Subject sub ON p.SubjectId = sub.Id JOIN Class cla ON stu.ClassId = cla.Id";
+            if (studentClass != null || subjectId != null) {
                 query += " WHERE ";
-                if(studentClass != null && subjectId != null)
-                    query += "stu.Class = '"+ studentClass +"' AND SubjectId = "+ subjectId;
-                else
-                {
-                    if(studentClass != null)
-                        query += "stu.Class = '"+ studentClass +"'";
+                if (studentClass != null && subjectId != null)
+                    query += "StudentClass = '" + studentClass + "' AND SubjectId = " + subjectId;
+                else {
+                    if (studentClass != null)
+                        query += "cla.Name = '" + studentClass + "'";
                     else
-                        query += "SubjectId = "+ subjectId;
+                        query += "sub.Id = " + subjectId;
                 }
             }
             statement = con.prepareStatement(query);
@@ -169,8 +158,18 @@ public class PointDao {
         });
     }
 
-    public List<Point> searchByNameOrStudentId(String key, String classKey, String subjectKey)
+    public void deleteByStudentId(String studentId) throws SQLException
     {
+        Connection con = ConnectionDao.getConnection();
+        String query = "DELETE FROM Point WHERE StudentId = ?";
+        PreparedStatement statement = con.prepareStatement(query);
+        statement.setString(1, studentId);
+        statement.executeUpdate();
+        statement.close();
+        con.close();
+    }
+
+    public List<Point> searchByNameOrStudentId(String key, String classKey, String subjectKey) {
         this.searchedPointList = new ArrayList<>();
         Connection con = null;
         PreparedStatement statement = null;
@@ -178,15 +177,14 @@ public class PointDao {
         try {
             con = ConnectionDao.getConnection();
             String query = "SELECT stu.StudentId, stu.Name, sub.Name SubjectName, p.Point1, p.Point2, p.PointFinal, p.TotalPoint, " +
-                    "sub.Id SubjectId, stu.Class StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
-                    "JOIN Subject sub ON p.SubjectId = sub.Id WHERE (stu.StudentId LIKE '%" + key +"%' OR stu.Name LIKE '%" + key + "%')";
-            if(!classKey.equals("All"))
-            {
-                query += " AND stu.Class = '"+ classKey +"'";
+                    "sub.Id SubjectId, cla.Name StudentClass FROM Student stu JOIN Point p ON stu.StudentId = p.StudentId " +
+                    "JOIN Subject sub ON p.SubjectId = sub.Id JOIN Class cla ON stu.ClassId = cla.Id " +
+                    "WHERE (stu.StudentId LIKE '%" + key + "%' OR stu.Name LIKE N'%" + key + "%')";
+            if (!classKey.equals("All")) {
+                query += " AND cla.Name = '" + classKey + "'";
             }
-            if(!subjectKey.equals("All"))
-            {
-                query += " AND sub.Name = '"+ subjectKey +"'";
+            if (!subjectKey.equals("All")) {
+                query += " AND sub.Name = '" + subjectKey + "'";
             }
             statement = con.prepareStatement(query);
             rs = statement.executeQuery();

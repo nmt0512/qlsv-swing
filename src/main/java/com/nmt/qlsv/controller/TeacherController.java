@@ -38,7 +38,7 @@ public class TeacherController {
         teacherView.addChooseRowOnTableListener(new ChooseRowOnTableListener());
     }
 
-    private void showTeacherList()
+    public void showTeacherList()
     {
         List<Teacher> teacherList = teacherDao.findAll();
         teacherView.showTeacherList(teacherList);
@@ -55,16 +55,19 @@ public class TeacherController {
         @Override
         public void actionPerformed(ActionEvent e) {
             Teacher teacher = teacherView.getTeacherInfo();
-            try
+            if(teacher != null)
             {
-                teacherDao.save(teacher);
+                try
+                {
+                    teacherDao.save(teacher);
+                    teacherView.showTeacherList(teacherDao.findAll());
+                    teacherView.showMessage("Đã lưu giảng viên");
+                }
+                catch (SQLException e1)
+                {
+                    teacherView.showMessage("Lỗi khi lưu giảng viên");
+                }
             }
-            catch (SQLException e1)
-            {
-                teacherView.showMessage(e1.getMessage());
-            }
-            teacherView.showTeacherList(teacherDao.findAll());
-            teacherView.showMessage("Đã lưu giảng viên");
         }
     }
 
@@ -74,16 +77,19 @@ public class TeacherController {
         @Override
         public void actionPerformed(ActionEvent e) {
             Teacher teacher = teacherView.getTeacherInfo();
-            try
+            if(teacher != null)
             {
-                teacherDao.save(teacher);
+                try
+                {
+                    teacherDao.save(teacher);
+                    teacherView.showTeacherList(teacherDao.findAll());
+                    teacherView.showMessage("Đã lưu giảng viên");
+                }
+                catch (SQLException e1)
+                {
+                    teacherView.showMessage("Lỗi khi lưu giảng viên");
+                }
             }
-            catch (SQLException e1)
-            {
-                teacherView.showMessage(e1.getMessage());
-            }
-            teacherView.showTeacherList(teacherDao.findAll());
-            teacherView.showMessage("Đã lưu giảng viên");
         }
     }
 
@@ -95,14 +101,14 @@ public class TeacherController {
             try
             {
                 teacherDao.deleteById(teacher.getId());
+                teacherView.showTeacherList(teacherDao.findAll());
+                teacherView.clearTeacherInfo();
+                teacherView.showMessage("Đã xóa giảng viên");
             }
             catch (SQLException e1)
             {
-                teacherView.showMessage(e1.getMessage());
+                teacherView.showMessage("Lỗi khi xóa giảng viên");
             }
-            teacherView.showTeacherList(teacherDao.findAll());
-            teacherView.clearTeacherInfo();
-            teacherView.showMessage("Đã xóa giảng viên");
         }
     }
 

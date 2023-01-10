@@ -42,12 +42,12 @@ public class SubjectController {
         subjectView.addExportExcelBtnListener(new ExportExcelBtnListener());
     }
 
-    private void showSubjectList()
+    public void showSubjectList()
     {
         List<Subject> subjectList = subjectDao.findAll();
         subjectView.showSubjectList(subjectList);
     }
-    private void setTeacherComboBoxData()
+    public void setTeacherComboBoxData()
     {
         List<Teacher> teacherList = teacherDao.findAll();
         subjectView.setTeacherComboBoxData(teacherList);

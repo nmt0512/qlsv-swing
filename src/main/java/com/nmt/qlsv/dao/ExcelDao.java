@@ -17,17 +17,17 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class ExcelDao {
     public void importStudentExcelToDatabase(String filePath) throws ParseException{
+        ClazzDao clazzDao = new ClazzDao();
         String excelFilePath = filePath;
         try {
             Connection con = ConnectionDao.getConnection();
             con.setAutoCommit(false);
-            String query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Class, Address, Hometown) " +
+            String query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Address, Hometown, ClassId) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement statement = con.prepareStatement(query);
 
@@ -62,16 +62,17 @@ public class ExcelDao {
                             statement.setDate(4, stringToDate(birthday));
                             break;
                         case 4:
-                            String clazz = nextCell.getStringCellValue();
-                            statement.setString(5, clazz);
+                            String address = nextCell.getStringCellValue();
+                            statement.setString(5, address);
                             break;
                         case 5:
-                            String address = nextCell.getStringCellValue();
-                            statement.setString(6, address);
+                            String hometown = nextCell.getStringCellValue();
+                            statement.setString(6, hometown);
                             break;
                         case 6:
-                            String hometown = nextCell.getStringCellValue();
-                            statement.setString(7, hometown);
+                            String clazz = nextCell.getStringCellValue();
+                            Integer classId = clazzDao.findIdByName(clazz);
+                            statement.setInt(7, classId);
                             break;
                     }
                 }
@@ -132,7 +133,7 @@ public class ExcelDao {
                         cell.setCellValue(student.getHometown());
                         break;
                     case 7:
-                        cell.setCellValue(student.getStudentClass());
+                        cell.setCellValue(student.getClassName());
                         break;
                 }
             }
@@ -388,6 +389,48 @@ public class ExcelDao {
         }
 
         FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/session/SessionDataSheet.xlsx"));
+        workbook.write(out);
+        out.close();
+    }
+
+    public void exportClassDatabaseToExcel(List<Clazz> clazzList, List<String> columnList) throws IOException {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet spreadsheet = workbook.createSheet(" Class Data ");
+        XSSFRow row = spreadsheet.createRow(0);
+
+        for(int cellId = 0; cellId < columnList.size(); cellId ++)
+        {
+            Cell cellColumn = row.createCell(cellId);
+            cellColumn.setCellValue(columnList.get(cellId));
+        }
+
+        int rowid = 1;
+        // writing the data into the sheets...
+        for (Clazz clazz: clazzList) {
+            row = spreadsheet.createRow(rowid++);
+            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+                Cell cell = row.createCell(cellId);
+                switch (cellId) {
+                    case 0:
+                        cell.setCellValue(clazz.getId());
+                        break;
+                    case 1:
+                        cell.setCellValue(clazz.getSessionId());
+                        break;
+                    case 2:
+                        cell.setCellValue(clazz.getDepartmentCode());
+                        break;
+                    case 3:
+                        cell.setCellValue(clazz.getName());
+                        break;
+                    case 4:
+                        cell.setCellValue(clazz.getStudentQuantity());
+                        break;
+                }
+            }
+        }
+
+        FileOutputStream out = new FileOutputStream(new File("D:/savedexcel/class/ClassDataSheet.xlsx"));
         workbook.write(out);
         out.close();
     }

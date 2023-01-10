@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserDao {
+    public static User loggingInUser;
     public Boolean checkUser(User user) {
         if (user != null) {
             Connection con = null;
@@ -20,11 +21,13 @@ public class UserDao {
                 statement = con.prepareStatement(query);
                 resultSet = statement.executeQuery();
                 if(resultSet.next())
+                {
+                    loggingInUser = new User(user.getUsername(), user.getPassword(), resultSet.getString("Fullname"));
                     return true;
+                }
             }
             catch(SQLException e)
             {
-                e.printStackTrace();
             }
             finally {
                 try{
@@ -34,10 +37,20 @@ public class UserDao {
                 }
                 catch(SQLException e1)
                 {
-                    e1.printStackTrace();
                 }
             }
         }
         return false;
+    }
+
+    public void updatePassword(User user) throws SQLException {
+        Connection con = ConnectionDao.getConnection();
+        String query = "UPDATE DBUser SET Password = ? WHERE Username = ?";
+        PreparedStatement statement = con.prepareStatement(query);
+        statement.setString(1, user.getPassword());
+        statement.setString(2, user.getUsername());
+        statement.executeUpdate();
+        statement.close();
+        con.close();
     }
 }

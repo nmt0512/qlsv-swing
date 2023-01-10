@@ -47,9 +47,9 @@ public class TeacherView extends JPanel {
     private JButton exportToExcelBtn;
     private JButton sortByNameBtn;
 
-    private String[] tableColumn = new String[]{"ID", "Tên giáo viên", "Tuổi", "Số điện thoại", "Email", "Ngày sinh",
+    private final String[] tableColumn = new String[]{"ID", "Tên giáo viên", "Tuổi", "Số điện thoại", "Email", "Ngày sinh",
             "Ngày bắt đầu", "Quê quán"};
-    private Object data = new Object[][]{};
+    private final Object data = new Object[][]{};
 
     public TeacherView()
     {
@@ -277,7 +277,7 @@ public class TeacherView extends JPanel {
         try
         {
             Teacher teacher = new Teacher();
-            if(!idField.getText().equals(""))
+            if(!idField.getText().isBlank())
                 teacher.setId(Integer.parseInt(idField.getText()));
             teacher.setName(nameField.getText());
             teacher.setAge(Integer.parseInt(ageField.getText()));
@@ -348,7 +348,7 @@ public class TeacherView extends JPanel {
 
     private boolean validateBirthday() {
         String date = birthdayField.getText();
-        String regex = "[0-3]\\d/[01]\\d/2\\d{3}";
+        String regex = "[0-3]\\d/[01]\\d/[12]\\d{3}";
         if(date == null || "".equals(date.trim()) || !date.matches(regex))
         {
             birthdayField.requestFocus();
@@ -360,7 +360,7 @@ public class TeacherView extends JPanel {
 
     private boolean validateStartWorking() {
         String date = startWorkingField.getText();
-        String regex = "[0-3]\\d/[01]\\d/2\\d{3}";
+        String regex = "[0-3]\\d/[01]\\d/[12]\\d{3}";
         if(date == null || "".equals(date.trim()) || !date.matches(regex))
         {
             birthdayField.requestFocus();

@@ -46,8 +46,8 @@ public class PointView extends JPanel {
     private JComboBox<String> subjectComboBox;
     private JComboBox<String> subjectComboBoxUpdate;
     private JComboBox<String> classComboBox;
-    private Object data = new Object [][] {};
-    private String [] columnNames = new String [] {"Student ID", "Name", "Subject Name", "Point 1"
+    private final Object data = new Object [][] {};
+    private final String [] columnNames = new String [] {"Student ID", "Name", "Subject Name", "Point 1"
             , "Point 2", "Point Final", "Total Point", "Class"};
 
     public PointView()
@@ -192,15 +192,15 @@ public class PointView extends JPanel {
         layout.putConstraint(SpringLayout.NORTH, exportToExcelBtn, northChooseExcel, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, exportToExcelBtn, 125, SpringLayout.WEST, sortByNameBtn);
 
-        int westSubjectLabelComboBox = 1000;
-        int northSubjectLabelComboBox = 770;
+        int westSubjectLabelComboBox = 980;
+        int northSubjectLabelComboBox = 760;
         layout.putConstraint(SpringLayout.WEST, subjectLabel, westSubjectLabelComboBox, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, subjectLabel, northSubjectLabelComboBox, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, subjectComboBox, westSubjectLabelComboBox + 50, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, subjectComboBox, northSubjectLabelComboBox - 3, SpringLayout.NORTH, this);
 
-        int westClassLabelComboBox = 850;
-        int northClassLabelComboBox = 770;
+        int westClassLabelComboBox = 830;
+        int northClassLabelComboBox = 760;
         layout.putConstraint(SpringLayout.WEST, classLabel, westClassLabelComboBox, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, classLabel, northClassLabelComboBox, SpringLayout.NORTH, this);
         layout.putConstraint(SpringLayout.WEST, classComboBox, westClassLabelComboBox + 50, SpringLayout.WEST, this);
@@ -232,16 +232,22 @@ public class PointView extends JPanel {
 
     public String getClassComboBoxSelectedItem()
     {
-        return classComboBox.getSelectedItem().toString();
+        if(classComboBox.getSelectedItem() != null)
+            return classComboBox.getSelectedItem().toString();
+        return null;
     }
 
     public String getSubjectComboBoxSelectedItem()
     {
-        return subjectComboBox.getSelectedItem().toString();
+        if(subjectComboBox.getSelectedItem() != null)
+            return subjectComboBox.getSelectedItem().toString();
+        return null;
     }
 
     public void setSubjectComboBoxData(List<String> listSubjectName)
     {
+        subjectComboBox.addItem("All");
+        subjectComboBoxUpdate.addItem("All");
         for(String name: listSubjectName)
         {
             subjectComboBox.addItem(name);
@@ -251,10 +257,21 @@ public class PointView extends JPanel {
 
     public void setClassComboBoxData(List<String> listClassName)
     {
+        classComboBox.addItem("All");
         for(String name: listClassName)
         {
             classComboBox.addItem(name);
         }
+    }
+
+    public void refreshComboBoxData(List<String> listSubjectName, List<String> listClassName)
+    {
+        subjectComboBox.removeAllItems();
+        subjectComboBoxUpdate.removeAllItems();
+        classComboBox.removeAllItems();
+
+        setSubjectComboBoxData(listSubjectName);
+        setClassComboBoxData(listClassName);
     }
 
     public void showListPoint(List<Point> list) {
@@ -287,6 +304,10 @@ public class PointView extends JPanel {
             if(pointTable.getModel().getValueAt(row, 6) != null)
                 pointFinalField.setText(pointTable.getModel().getValueAt(row, 6).toString());
             subjectComboBoxUpdate.setSelectedItem(pointTable.getModel().getValueAt(row, 2));
+
+            studentIdField.setEditable(false);
+            subjectComboBoxUpdate.setEnabled(false);
+
             editPointBtn.setEnabled(true);
             deletePointBtn.setEnabled(true);
             addPointBtn.setEnabled(false);
@@ -299,6 +320,11 @@ public class PointView extends JPanel {
         point1Field.setText("");
         point2Field.setText("");
         pointFinalField.setText("");
+        subjectComboBoxUpdate.setSelectedItem("All");
+
+        studentIdField.setEditable(true);
+        subjectComboBoxUpdate.setEnabled(true);
+
         editPointBtn.setEnabled(false);
         deletePointBtn.setEnabled(false);
         addPointBtn.setEnabled(true);
@@ -310,6 +336,10 @@ public class PointView extends JPanel {
         point1Field.setText(point.getPoint1().toString());
         point2Field.setText("" + point.getPoint2().toString());
         pointFinalField.setText(point.getPointFinal().toString());
+
+        studentIdField.setEditable(false);
+        subjectComboBoxUpdate.setEnabled(false);
+
         editPointBtn.setEnabled(true);
         deletePointBtn.setEnabled(true);
         addPointBtn.setEnabled(false);

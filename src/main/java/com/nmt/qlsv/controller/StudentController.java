@@ -1,8 +1,6 @@
 package com.nmt.qlsv.controller;
 
-import com.nmt.qlsv.dao.ClazzDao;
-import com.nmt.qlsv.dao.ExcelDao;
-import com.nmt.qlsv.dao.StudentDao;
+import com.nmt.qlsv.dao.*;
 import com.nmt.qlsv.entity.Clazz;
 import com.nmt.qlsv.entity.Student;
 import com.nmt.qlsv.view.StudentView;
@@ -24,12 +22,18 @@ public class StudentController {
     private StudentView studentView;
     private ClazzDao clazzDao;
     private ExcelDao excelDao;
+    private SessionDao sessionDao;
+    private PointDao pointDao;
 
     public StudentController() {
         studentDao = new StudentDao();
         studentView = new StudentView();
         clazzDao = new ClazzDao();
         excelDao = new ExcelDao();
+        sessionDao = new SessionDao();
+        pointDao = new PointDao();
+
+        sessionDao.findAll();
 
         studentView.addAddStudentListener(new AddStudentListener());
         studentView.addEdiStudentListener(new EditStudentListener());
@@ -40,7 +44,6 @@ public class StudentController {
         studentView.addChooseExcelFileListener(new ChooseExcelFileListener());
         studentView.addClassComboBoxListener(new ClassComboBoxListener());
         studentView.addExportToExcelListener(new ExportToExcelListener());
-//        studentView.addShowPointListener(new ShowPointListener());
         studentView.addSearchFieldListener(new SearchFieldListener());
 
         setClassComboBoxData();
@@ -52,7 +55,7 @@ public class StudentController {
         return studentView;
     }
 
-    private void setClassComboBoxData()
+    public void setClassComboBoxData()
     {
         List<Clazz> listClazz = clazzDao.findAll();
         List<String> listClassName = new ArrayList<>();
@@ -63,7 +66,7 @@ public class StudentController {
         studentView.setDataForComboBox(listClassName);
     }
 
-    private void showStudentView() {
+    public void showStudentView() {
         List<Student> studentList = studentDao.findAll();
         studentView.setVisible(true);
         studentView.showListStudents(studentList);
@@ -75,15 +78,27 @@ public class StudentController {
             if (student != null) {
                 try
                 {
-                    studentDao.add(student);
+                    Integer classId = clazzDao.findIdByName(student.getClassName());
+                    student.setClassId(classId);
+                    studentDao.save(student);
+
+                    clazzDao.updateStuQuantityByClassName(student.getClassName(), true);
+                    clazzDao.findAll();
+                    Integer sessionId = clazzDao.findSessionIdByClassName(student.getClassName());
+                    sessionDao.updateStuQuantityBySessionId(sessionId, true);
+                    sessionDao.findAll();
+
                     studentView.showStudentToTextField(student);
                     studentView.showListStudents(studentDao.findAll());
-                    studentView.showMessage("Thêm thành công!");
+                    studentView.showMessage("Thêm sinh viên thành công");
                 }
                 catch (SQLException e1)
                 {
                     studentView.showMessage("Lỗi khi thêm sinh viên: trùng mã sinh viên hoặc lỗi hệ thống");
-                    e1.printStackTrace();
+                }
+                catch (NullPointerException e2)
+                {
+                    studentView.showMessage("Không tìm thấy lớp sinh viên đã cập nhật");
                 }
             }
         }
@@ -95,14 +110,41 @@ public class StudentController {
             if (student != null) {
                 try
                 {
-                    studentDao.edit(student);
+                    Integer classId = clazzDao.findIdByName(student.getClassName());
+                    student.setClassId(classId);
+                    String oldClass = studentDao.findClassNameById(student.getId());
+                    String newClass = student.getClassName();
+
+                    if(!oldClass.equals(newClass))
+                    {
+                        Integer oldSessionId = null;
+                        Integer newSessionId = null;
+                        for(Clazz clazz: clazzDao.getClazzList())
+                        {
+                            if(clazz.getName().equals(oldClass))
+                                oldSessionId = clazz.getSessionId();
+                            if(clazz.getName().equals(newClass))
+                                newSessionId = clazz.getSessionId();
+                        }
+                        if(oldSessionId != newSessionId)
+                        {
+                            sessionDao.updateStuQuantityBySessionId(oldSessionId, false);
+                            sessionDao.updateStuQuantityBySessionId(newSessionId, true);
+                            sessionDao.findAll();
+                        }
+                        clazzDao.updateStuQuantityByClassName(oldClass, false);
+                        clazzDao.updateStuQuantityByClassName(newClass, true);
+                        clazzDao.findAll();
+                    }
+
+                    studentDao.save(student);
                     studentView.showStudentToTextField(student);
                     studentView.showListStudents(studentDao.findAll());
-                    studentView.showMessage("Cập nhật thành công!");
+                    studentView.showMessage("Cập nhật thành công");
                 }
                 catch (SQLException e1)
                 {
-                    studentView.showMessage("Lỗi khi cập nhật thông tin sinh viên");
+                    studentView.showMessage("Error! Không thể cập nhật mã sinh viên đã có điểm");
                 }
             }
         }
@@ -114,14 +156,22 @@ public class StudentController {
             if (student != null) {
                 try
                 {
-                    studentDao.delete(student);
+                    pointDao.deleteByStudentId(student.getStudentId());
+                    studentDao.deleteById(student.getId());
+
+                    clazzDao.updateStuQuantityByClassName(student.getClassName(), false);
+                    clazzDao.findAll();
+                    Integer sessionId = clazzDao.findSessionIdByClassName(student.getClassName());
+                    sessionDao.updateStuQuantityBySessionId(sessionId, false);
+                    sessionDao.findAll();
+
                     studentView.clearStudentInfo();
                     studentView.showListStudents(studentDao.findAll());
-                    studentView.showMessage("Xóa thành công!");
+                    studentView.showMessage("Xóa thành công");
                 }
                 catch (SQLException e1)
                 {
-                    studentView.showMessage("Lỗi khi cập nhật thông tin sinh viên");
+                    studentView.showMessage("Error! Không thể xóa sinh viên đã có điểm");
                 }
             }
         }
@@ -186,18 +236,13 @@ public class StudentController {
         @Override
         public void actionPerformed(ActionEvent e) {
             String selectedClass = studentView.getClassSelectedFromComboBox();
-            List<Student> listStudentByClass = studentDao.findAll(selectedClass);
-            studentView.showListStudents(listStudentByClass);
+            if(selectedClass != null)
+            {
+                List<Student> listStudentByClass = studentDao.findAll(selectedClass);
+                studentView.showListStudents(listStudentByClass);
+            }
         }
     }
-
-//    class ShowPointListener implements ActionListener {
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            pointController = new PointController();
-//            pointView.setVisible(true);
-//        }
-//    }
 
     class SearchFieldListener implements KeyListener{
         @Override

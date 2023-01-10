@@ -1,7 +1,6 @@
 package com.nmt.qlsv.view;
 
 import com.nmt.qlsv.entity.Session;
-import com.nmt.qlsv.entity.Subject;
 import com.nmt.qlsv.entity.Teacher;
 
 import javax.swing.*;
@@ -9,15 +8,14 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
 import java.util.List;
 
 public class SessionView extends JPanel {
     private JTable sessionTable;
     private JScrollPane jScrollPaneTable;
 
-    private String[] tableColumn = new String[]{"ID", "Năm bắt đầu", "Năm kết thúc", "Số lượng sinh viên", "Trưởng bộ môn"};
-    private Object data = new Object[][]{};
+    private final String[] tableColumn = new String[]{"ID", "Năm bắt đầu", "Năm kết thúc", "Số lượng sinh viên", "Trưởng bộ môn"};
+    private final Object data = new Object[][]{};
 
     private JLabel idLabel;
     private JLabel startYearLabel;
@@ -60,7 +58,6 @@ public class SessionView extends JPanel {
         teacherNameLabel = new JLabel("Teacher name");
 
         idField = new JTextField(6);
-        idField.setEditable(false);
         startYearField = new JTextField(10);
         endYearField = new JTextField(10);
         stuQuantityField = new JTextField(8);
@@ -111,7 +108,7 @@ public class SessionView extends JPanel {
         layout.putConstraint(SpringLayout.WEST, teacherNameLabel, westLabel, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, teacherNameLabel, 30, SpringLayout.NORTH, stuQuantityLabel);
 
-        int westTextField = 130;
+        int westTextField = 150;
         int northTextField = 70;
         layout.putConstraint(SpringLayout.WEST, idField, westTextField, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, idField, northTextField, SpringLayout.NORTH, this);
@@ -161,7 +158,7 @@ public class SessionView extends JPanel {
             session[i][1] = list.get(i).getStartYear();
             session[i][2] = list.get(i).getEndYear();
             session[i][3] = list.get(i).getStuQuantity();
-            session[i][4] = list.get(i).getTeacherName();
+            session[i][4] = list.get(i).getTeacherName() +" - "+ list.get(i).getTeacherId();
         }
         sessionTable.setModel(new DefaultTableModel(session, tableColumn));
     }
@@ -171,8 +168,14 @@ public class SessionView extends JPanel {
         teacherComboBox.addItem("");
         for(Teacher teacher: teacherList)
         {
-            teacherComboBox.addItem(teacher.getName());
+            teacherComboBox.addItem(teacher.getName() +" - "+ teacher.getId());
         }
+    }
+
+    public void refreshComboBoxData(List<Teacher> teacherList)
+    {
+        teacherComboBox.removeAllItems();
+        setTeacherComboBoxData(teacherList);
     }
 
     public void clearSessionInfo() {
@@ -182,6 +185,7 @@ public class SessionView extends JPanel {
         stuQuantityField.setText("");
         teacherComboBox.setSelectedItem("");
 
+        idField.setEditable(true);
         editBtn.setEnabled(false);
         deleteBtn.setEnabled(false);
         addBtn.setEnabled(true);
@@ -200,6 +204,7 @@ public class SessionView extends JPanel {
                 stuQuantityField.setText(sessionTable.getModel().getValueAt(row, 3).toString());
             teacherComboBox.setSelectedItem(sessionTable.getModel().getValueAt(row, 4));
 
+            idField.setEditable(false);
             editBtn.setEnabled(true);
             deleteBtn.setEnabled(true);
             addBtn.setEnabled(false);
@@ -215,10 +220,14 @@ public class SessionView extends JPanel {
             session.setStartYear(Integer.parseInt(startYearField.getText()));
             session.setEndYear(Integer.parseInt(endYearField.getText()));
             if(stuQuantityField.getText().equals(""))
-                session.setStuQuantity(null);
+                session.setStuQuantity(0);
             else
                 session.setStuQuantity(Integer.parseInt(stuQuantityField.getText()));
-            session.setTeacherName(teacherComboBox.getSelectedItem().toString());
+
+            String selectedTeacher = teacherComboBox.getSelectedItem().toString();
+            List<String> teacher = List.of(selectedTeacher.split(" - "));
+            session.setTeacherName(teacher.get(0));
+            session.setTeacherId(Integer.parseInt(teacher.get(1)));
             return session;
         } catch (Exception e) {
             showMessage(e.getMessage());

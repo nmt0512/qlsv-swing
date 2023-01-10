@@ -109,7 +109,7 @@ public class TeacherDao {
         try
         {
             con = ConnectionDao.getConnection();
-            String query = "SELECT * FROM Teacher WHERE Name LIKE '%"+ key +"%'";
+            String query = "SELECT * FROM Teacher WHERE Name LIKE N'%"+ key +"%'";
             statement = con.prepareStatement(query);
             rs = statement.executeQuery();
             while(rs.next())

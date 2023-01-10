@@ -16,40 +16,43 @@ public class StudentDao {
         findAll();
         this.listSearchedStudent = new ArrayList<>();
     }
+
     public List<Student> getListStudent() {
         return this.listStudent;
     }
-    public List<Student> getListSearchedStudent(){
+
+    public List<Student> getListSearchedStudent() {
         return this.listSearchedStudent;
     }
 
-    private PreparedStatement mapStudentToQuery(PreparedStatement statement, Student student) throws SQLException {
+    private void executeUpdate(PreparedStatement statement, Student student) throws SQLException {
         statement.setString(1, student.getStudentId());
         statement.setString(2, student.getName());
         statement.setInt(3, student.getAge());
         statement.setDate(4, student.getBirthday());
-        statement.setString(5, student.getStudentClass());
-        statement.setString(6, student.getAddress());
-        statement.setString(7, student.getHometown());
+        statement.setString(5, student.getAddress());
+        statement.setString(6, student.getHometown());
+        statement.setInt(7, student.getClassId());
         if (student.getId() != null)
             statement.setInt(8, student.getId());
-        return statement;
+        statement.executeUpdate();
     }
 
-    private void save(String query, Student... student) throws SQLException {
+    public void save(Student student) throws SQLException {
         Connection con = null;
         PreparedStatement statement = null;
         con = ConnectionDao.getConnection();
+        String query;
+        if (student.getId() == null)
+            query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Address, Hometown, ClassId) " +
+                    "VALUES(?,?,?,?,?,?,?)";
+        else
+            query = "UPDATE Student SET StudentId = ?, Name = ?, Age = ?, Birthday = ?, Address = ?, " +
+                    "Hometown = ?, ClassId = ? WHERE Id = ?";
         statement = con.prepareStatement(query);
-        if (student != null)
-            statement = mapStudentToQuery(statement, student[0]);
-        statement.executeUpdate();
-        try {
-            statement.close();
-            con.close();
-        } catch (SQLException e1) {
-            e1.printStackTrace();
-        }
+        executeUpdate(statement, student);
+        statement.close();
+        con.close();
     }
 
     public List<Student> findAll(String... classParam) {
@@ -59,9 +62,10 @@ public class StudentDao {
         ResultSet resultSet = null;
         try {
             con = ConnectionDao.getConnection();
-            String query = "SELECT * FROM Student";
+            String query = "SELECT stu.Id, stu.StudentId, stu.Name, stu.Age, stu.Birthday, stu.Address, stu.Hometown, " +
+                    "stu.ClassId, cla.Name ClassName FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id";
             if (classParam.length != 0 && !classParam[0].equals("All")) {
-                query += " WHERE Class = ?";
+                query += " WHERE ClassName = ?";
                 statement = con.prepareStatement(query);
                 statement.setString(1, classParam[0]);
             } else {
@@ -75,12 +79,42 @@ public class StudentDao {
                 student.setName(resultSet.getString("Name"));
                 student.setAge(resultSet.getInt("Age"));
                 student.setBirthday(resultSet.getDate("Birthday"));
-                student.setStudentClass(resultSet.getString("Class"));
                 student.setAddress(resultSet.getString("Address"));
                 student.setHometown(resultSet.getString("Hometown"));
+                student.setClassId(resultSet.getInt("ClassId"));
+                student.setClassName(resultSet.getString("ClassName"));
                 listStudent.add(student);
             }
             return listStudent;
+        }
+        catch (SQLException e) {
+        }
+        finally {
+            try {
+                resultSet.close();
+                statement.close();
+                con.close();
+            }
+            catch (SQLException | NullPointerException e1) {
+            }
+        }
+        return null;
+    }
+
+    public String findClassNameByStudentId(String studentId) {
+        Connection con = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        String result = null;
+        try {
+            con = ConnectionDao.getConnection();
+            String query = "SELECT cla.Name ClassName FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id " +
+                    "WHERE stu.StudentId = '" + studentId + "'";
+            statement = con.prepareStatement(query);
+            resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                result = resultSet.getString("ClassName");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -92,40 +126,23 @@ public class StudentDao {
                 e1.printStackTrace();
             }
         }
-        return null;
+        return result;
     }
 
-    public String findStudentClassByStudentId(String studentId)
-    {
-        Connection con = null;
-        PreparedStatement statement = null;
-        ResultSet resultSet = null;
-        String result = null;
-        try
-        {
-            con = ConnectionDao.getConnection();
-            String query = "SELECT Class FROM Student WHERE StudentId = '"+ studentId +"'";
-            statement = con.prepareStatement(query);
-            resultSet = statement.executeQuery();
-            if(resultSet.next())
-            {
-                result = resultSet.getString("Class");
-            }
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                resultSet.close();
-                statement.close();
-                con.close();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-        }
-        return result;
+    public String findClassNameById(Integer id) throws SQLException {
+        String studentClass = null;
+        Connection con = ConnectionDao.getConnection();
+        String query = "SELECT cla.Name ClassName FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id " +
+                "WHERE stu.Id = ?";
+        PreparedStatement statement = con.prepareStatement(query);
+        statement.setInt(1, id);
+        ResultSet rs = statement.executeQuery();
+        if (rs.next())
+            studentClass = rs.getString("ClassName");
+        rs.close();
+        statement.close();
+        con.close();
+        return studentClass;
     }
 
     public List<String> getListColumnName() {
@@ -135,7 +152,8 @@ public class StudentDao {
         ResultSet resultSet = null;
         try {
             con = ConnectionDao.getConnection();
-            String query = "SELECT * FROM Student";
+            String query = "SELECT stu.Id, stu.StudentId, stu.Name, stu.Age, stu.Birthday, stu.Address, stu.Hometown, " +
+                    "cla.Name Class FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id";
             statement = con.prepareStatement(query);
             resultSet = statement.executeQuery();
             ResultSetMetaData rsmd = resultSet.getMetaData();
@@ -157,21 +175,16 @@ public class StudentDao {
         return null;
     }
 
-    public void add(Student student) throws SQLException {
-        String query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Class, Address, Hometown) " +
-                "VALUES(?,?,?,?,?,?,?)";
-        save(query, student);
-    }
-
-    public void edit(Student student) throws SQLException {
-        String query = "UPDATE Student SET StudentId = ?, Name = ?, Age = ?, Birthday = ?, Class = ?, Address = ?, " +
-                "Hometown = ? WHERE Id = ?";
-        save(query, student);
-    }
-
-    public void delete(Student student) throws SQLException {
-        String query = "DELETE FROM Student WHERE Id = " + student.getId();
-        save(query, null);
+    public void deleteById(Integer id) throws SQLException {
+        Connection con = null;
+        PreparedStatement statement = null;
+        con = ConnectionDao.getConnection();
+        String query = "DELETE FROM Student WHERE Id = ?";
+        statement = con.prepareStatement(query);
+        statement.setInt(1, id);
+        statement.executeUpdate();
+        statement.close();
+        con.close();
     }
 
     //sort student list by name ascend
@@ -186,17 +199,18 @@ public class StudentDao {
         });
     }
 
-    public List<Student> searchByNameOrStudentId(String key, String classKey)
-    {
+    public List<Student> searchByNameOrStudentId(String key, String classKey) {
         this.listSearchedStudent = new ArrayList<>();
         Connection con = null;
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {
             con = ConnectionDao.getConnection();
-            String query = "SELECT * FROM Student WHERE (StudentId LIKE '%" + key +"%' OR Name LIKE '%" + key + "%')";
-            if(!classKey.equals("All"))
-                query += " AND Class = '" + classKey +"'";
+            String query = "SELECT stu.Id, stu.StudentId, stu.Name, stu.Age, stu.Birthday, stu.Address, stu.Hometown, " +
+                    "stu.ClassId, cla.Name ClassName FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id " +
+                    "WHERE (stu.StudentId LIKE '%" + key + "%' OR stu.Name LIKE N'%" + key + "%')";
+            if (!classKey.equals("All"))
+                query += " AND cla.Name = '" + classKey + "'";
             statement = con.prepareStatement(query);
             resultSet = statement.executeQuery();
             while (resultSet.next()) {
@@ -206,9 +220,10 @@ public class StudentDao {
                 student.setName(resultSet.getString("Name"));
                 student.setAge(resultSet.getInt("Age"));
                 student.setBirthday(resultSet.getDate("Birthday"));
-                student.setStudentClass(resultSet.getString("Class"));
                 student.setAddress(resultSet.getString("Address"));
                 student.setHometown(resultSet.getString("Hometown"));
+                student.setClassId(resultSet.getInt("ClassId"));
+                student.setClassName(resultSet.getString("ClassName"));
                 listSearchedStudent.add(student);
             }
             return listSearchedStudent;

@@ -15,8 +15,8 @@ public class SubjectView extends JPanel {
     private JTable subjectTable;
     private JScrollPane jScrollPaneTable;
 
-    private String[] tableColumn = new String[]{"ID", "Tên môn học", "Số tín chỉ", "Trưởng bộ môn"};
-    private Object data = new Object[][]{};
+    private final String[] tableColumn = new String[]{"ID", "Tên môn học", "Số tín chỉ", "Trưởng bộ môn"};
+    private final Object data = new Object[][]{};
 
     private JLabel idLabel;
     private JLabel subjectNameLabel;
@@ -124,8 +124,6 @@ public class SubjectView extends JPanel {
         layout.putConstraint(SpringLayout.NORTH, subjectNameField, 30, SpringLayout.NORTH, idField);
         layout.putConstraint(SpringLayout.WEST, creditField, westTextField, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, creditField, 30, SpringLayout.NORTH, subjectNameField);
-//        layout.putConstraint(SpringLayout.WEST, teacherField, westTextField, SpringLayout.WEST, this);
-//        layout.putConstraint(SpringLayout.NORTH, teacherField, 30, SpringLayout.NORTH, creditField);
         layout.putConstraint(SpringLayout.WEST, teacherComboBox, westTextField, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, teacherComboBox, 30, SpringLayout.NORTH, creditField);
 
@@ -165,7 +163,7 @@ public class SubjectView extends JPanel {
             subject[i][0] = list.get(i).getId();
             subject[i][1] = list.get(i).getName();
             subject[i][2] = list.get(i).getCredit();
-            subject[i][3] = list.get(i).getTeacherName();
+            subject[i][3] = list.get(i).getTeacherName() +" - "+ list.get(i).getTeacherId();
         }
         subjectTable.setModel(new DefaultTableModel(subject, tableColumn));
     }
@@ -175,8 +173,14 @@ public class SubjectView extends JPanel {
         teacherComboBox.addItem("");
         for(Teacher teacher: teacherList)
         {
-            teacherComboBox.addItem(teacher.getName());
+            teacherComboBox.addItem(teacher.getName() +" - "+ teacher.getId());
         }
+    }
+
+    public void refreshComboBoxData(List<Teacher> teacherList)
+    {
+        teacherComboBox.removeAllItems();
+        setTeacherComboBoxData(teacherList);
     }
 
     public String getSearchedKey()
@@ -194,19 +198,6 @@ public class SubjectView extends JPanel {
         editBtn.setEnabled(false);
         deleteBtn.setEnabled(false);
         addBtn.setEnabled(true);
-    }
-
-    public void showSubjectToTextField(Subject subject) {
-        idField.setText("" + subject.getId());
-        subjectNameField.setText(subject.getName());
-        creditField.setText("" + subject.getCredit());
-//        teacherField.setText(subject.getTeacherName());
-
-        teacherComboBox.setSelectedItem(subject.getTeacherName());
-
-        editBtn.setEnabled(true);
-        deleteBtn.setEnabled(true);
-        addBtn.setEnabled(false);
     }
 
     public void fillFieldFromSelectedRow() {
@@ -232,11 +223,16 @@ public class SubjectView extends JPanel {
             return null;
         try {
             Subject subject = new Subject();
-            if(!idField.getText().equals(""))
+            if(!idField.getText().isBlank())
                 subject.setId(Integer.parseInt(idField.getText()));
             subject.setName(subjectNameField.getText());
             subject.setCredit(Integer.parseInt(creditField.getText()));
-            subject.setTeacherName(teacherComboBox.getSelectedItem().toString());
+
+            String selectedTeacher = teacherComboBox.getSelectedItem().toString();
+            List<String> teacher = List.of(selectedTeacher.split(" - "));
+
+            subject.setTeacherName(teacher.get(0));
+            subject.setTeacherId(Integer.parseInt(teacher.get(1)));
             return subject;
         } catch (Exception e) {
             showMessage(e.getMessage());
@@ -247,7 +243,7 @@ public class SubjectView extends JPanel {
     private boolean validateSubjectName() {
         String subjectName = subjectNameField.getText();
         if (subjectName == null || "".equals(subjectName.trim())) {
-            idField.requestFocus();
+            subjectNameField.requestFocus();
             showMessage("Tên môn học không được trống");
             return false;
         }
@@ -273,7 +269,6 @@ public class SubjectView extends JPanel {
     private boolean validateTeacherName() {
         String teacherName = teacherComboBox.getSelectedItem().toString();
         if (teacherName.equals("")) {
-            idField.requestFocus();
             showMessage("Vui lòng chọn tên trưởng bộ môn");
             return false;
         }

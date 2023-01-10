@@ -7,6 +7,14 @@ public class Clazz {
     private String name;
     private Integer studentQuantity;
 
+    public Clazz(Integer id, Integer sessionId, String departmentCode, String name, Integer studentQuantity) {
+        this.id = id;
+        this.sessionId = sessionId;
+        this.departmentCode = departmentCode;
+        this.name = name;
+        this.studentQuantity = studentQuantity;
+    }
+
     public Clazz(Integer sessionId, String departmentCode, String name, Integer studentQuantity) {
         this.sessionId = sessionId;
         this.departmentCode = departmentCode;

@@ -14,7 +14,7 @@ StudentId varchar(10) UNIQUE NOT NULL,
 Name nvarchar(25) NOT NULL,
 Age int CHECK(age >= 0 AND age <= 100),
 Birthday date,
-Class varchar(10) foreign key references Class(Name),
+ClassId int foreign key references Class(Id),
 Address nvarchar(100),
 Hometown nvarchar(20),
 )
@@ -90,6 +90,10 @@ SELECT * FROM Session
 
 SELECT * FROM Teacher
 
+SELECT * FROM Class
+
+SELECT * FROM Department
+
 USE qlsv
 
 SELECT * FROM Student WHERE Class = 'CT4B'
@@ -114,8 +118,21 @@ INSERT INTO Teacher(Name, Age, Phone, Email) VALUES('Teacher 2', 50, '1234567890
 INSERT INTO Session(Id, StartYear, EndYear, StuQuantity, TeacherId) VALUES(16, 2019, 2024, 700, 1)
 INSERT INTO Session(Id, StartYear, EndYear, StuQuantity, TeacherId) VALUES(17, 2020, 2025, 700, 1)
 
-INSERT INTO Department(Name, Code, StuQuantity, TeacherId) VALUES('Điện tử viễn thông', 'DT', 250, 2)
+INSERT INTO Department(Name, Code, StuQuantity, TeacherId) VALUES(N'Điện tử viễn thông', 'DT', 250, 2)
 
 INSERT INTO Class(SessionId, DepartmentCode, Name, StuQuantity) VALUES(17, 'DT', 'DT4A', 80)
 
 SELECT sub.Id, sub.Name, sub.Credit, sub.TeacherId, tea.Name TeacherName FROM Subject sub JOIN Teacher tea ON sub.TeacherId = tea.Id
+
+
+UPDATE Class SET StuQuantity = 0
+
+ALTER TABLE Student
+ADD CONSTRAINT FK_Student_ClassId FOREIGN KEY(ClassId) REFERENCES Class(Id)
+
+ALTER TABLE Student
+ADD ClassId int NULL
+
+UPDATE Session SET StuQuantity = 0
+
+UPDATE Point SET StudentId = 'CT040246', SubjectId = 1, Point1 = 7, Point2 = 7, PointFinal = 7, TotalPoint = 7 WHERE StudentId = 'CT040246', SubjectId = 1
