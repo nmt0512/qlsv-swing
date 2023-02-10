@@ -59,13 +59,13 @@ public class TeacherView extends JPanel {
     private void initComponent()
     {
         idLabel = new JLabel("ID");
-        nameLabel = new JLabel("Name");
-        ageLabel = new JLabel("Age");
-        phoneLabel = new JLabel("Phone");
+        nameLabel = new JLabel("Họ tên");
+        ageLabel = new JLabel("Tuổi");
+        phoneLabel = new JLabel("SĐT");
         emailLabel = new JLabel("Email");
-        birthdayLabel = new JLabel("Birthday");
-        startWorkingLabel = new JLabel("Start Working");
-        hometownLabel = new JLabel("Hometown");
+        birthdayLabel = new JLabel("Ngày sinh");
+        startWorkingLabel = new JLabel("Ngày bắt đầu");
+        hometownLabel = new JLabel("Quê quán");
 
         searchLabel = new JLabel();
         searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));

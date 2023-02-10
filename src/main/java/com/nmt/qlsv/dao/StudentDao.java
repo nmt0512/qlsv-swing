@@ -65,7 +65,7 @@ public class StudentDao {
             String query = "SELECT stu.Id, stu.StudentId, stu.Name, stu.Age, stu.Birthday, stu.Address, stu.Hometown, " +
                     "stu.ClassId, cla.Name ClassName FROM Student stu JOIN Class cla ON stu.ClassId = cla.Id";
             if (classParam.length != 0 && !classParam[0].equals("All")) {
-                query += " WHERE ClassName = ?";
+                query += " WHERE cla.Name = ?";
                 statement = con.prepareStatement(query);
                 statement.setString(1, classParam[0]);
             } else {

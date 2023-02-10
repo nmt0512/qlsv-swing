@@ -210,7 +210,15 @@ public class StudentController {
                 }
                 catch (ParseException e1)
                 {
-                    studentView.showMessage("Error importing file");
+                    studentView.showMessage("Lỗi khi import file Excel");
+                }
+                catch (SQLException e2)
+                {
+                    studentView.showMessage("Mã sinh viên đã tồn tại hoặc không tồn tại lớp học");
+                }
+                catch (IOException e3)
+                {
+                    studentView.showMessage("Lỗi khi đọc file Excel");
                 }
             }
         }

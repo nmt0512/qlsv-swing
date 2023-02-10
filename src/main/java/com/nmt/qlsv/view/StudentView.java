@@ -53,7 +53,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
     private JTextField hometownField;
 
     // define columns in student table
-    private final String [] columnNames = new String [] {"ID", "Student ID", "Name", "Age", "Address", "Birthday", "Hometown", "Class"};
+    private final String [] columnNames = new String [] {"ID", "Mã SV", "Họ tên", "Tuổi", "Địa chỉ", "Ngày sinh", "Quê quán", "Lớp"};
     private final Object data = new Object [][] {};
 
     public StudentView() {
@@ -75,14 +75,14 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         studentTable = new JTable();
         
         // init label
-        idLabel = new JLabel("Id");
-        studentIdLabel = new JLabel("Student Id");
-        nameLabel = new JLabel("Name");
-        ageLabel = new JLabel("Age");
-        addressLabel = new JLabel("Address");
-        classLabel = new JLabel("Class");
-        birthdayLabel = new JLabel("Birthday");
-        hometownLabel = new JLabel("Hometown");
+        idLabel = new JLabel("ID");
+        studentIdLabel = new JLabel("Mã SV");
+        nameLabel = new JLabel("Họ tên");
+        ageLabel = new JLabel("Tuổi");
+        addressLabel = new JLabel("Địa chỉ");
+        classLabel = new JLabel("Lớp");
+        birthdayLabel = new JLabel("Ngày sinh");
+        hometownLabel = new JLabel("Quê quán");
         searchLabel = new JLabel();
         searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));
         classLabelBesideComboBox = new JLabel("Class");

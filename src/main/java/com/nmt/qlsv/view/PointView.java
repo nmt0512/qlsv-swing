@@ -47,8 +47,8 @@ public class PointView extends JPanel {
     private JComboBox<String> subjectComboBoxUpdate;
     private JComboBox<String> classComboBox;
     private final Object data = new Object [][] {};
-    private final String [] columnNames = new String [] {"Student ID", "Name", "Subject Name", "Point 1"
-            , "Point 2", "Point Final", "Total Point", "Class"};
+    private final String [] columnNames = new String [] {"Mã SV", "Họ tên", "Tên môn học", "Điểm TP 1"
+            , "Điểm TP 2", "Điểm cuối kỳ", "Điểm tổng", "Lớp"};
 
     public PointView()
     {
@@ -57,14 +57,14 @@ public class PointView extends JPanel {
 
     public void initComponent()
     {
-        studentIdLabel = new JLabel("Student Id");
-        point1Label = new JLabel("Point 1");
-        point2Label = new JLabel("Point 2");
-        pointFinalLabel = new JLabel("Point Final");
-        subjectLabelUpdate = new JLabel("Subject");
-        subjectLabel = new JLabel("Subject");
+        studentIdLabel = new JLabel("Mã sinh viên");
+        point1Label = new JLabel("Điểm TP 1");
+        point2Label = new JLabel("Điểm TP 2");
+        pointFinalLabel = new JLabel("Điểm cuối kỳ");
+        subjectLabelUpdate = new JLabel("Môn học");
+        subjectLabel = new JLabel("Môn");
         subjectLabel.setForeground(Color.GRAY);
-        classLabel = new JLabel("Class");
+        classLabel = new JLabel("Lớp");
         classLabel.setForeground(Color.GRAY);
 
         searchLabel = new JLabel();
@@ -196,7 +196,7 @@ public class PointView extends JPanel {
         int northSubjectLabelComboBox = 760;
         layout.putConstraint(SpringLayout.WEST, subjectLabel, westSubjectLabelComboBox, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, subjectLabel, northSubjectLabelComboBox, SpringLayout.NORTH, this);
-        layout.putConstraint(SpringLayout.WEST, subjectComboBox, westSubjectLabelComboBox + 50, SpringLayout.WEST, this);
+        layout.putConstraint(SpringLayout.WEST, subjectComboBox, westSubjectLabelComboBox + 45, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, subjectComboBox, northSubjectLabelComboBox - 3, SpringLayout.NORTH, this);
 
         int westClassLabelComboBox = 830;

@@ -52,10 +52,10 @@ public class SessionView extends JPanel {
         jScrollPaneTable.setPreferredSize(new Dimension(850, 700));
 
         idLabel = new JLabel("ID");
-        startYearLabel = new JLabel("Start Year");
-        endYearLabel = new JLabel("End Year");
-        stuQuantityLabel = new JLabel("Student Quantity");
-        teacherNameLabel = new JLabel("Teacher name");
+        startYearLabel = new JLabel("Năm bắt đầu");
+        endYearLabel = new JLabel("Năm kết thúc");
+        stuQuantityLabel = new JLabel("SL sinh viên");
+        teacherNameLabel = new JLabel("GV khóa");
 
         idField = new JTextField(6);
         startYearField = new JTextField(10);
@@ -106,7 +106,7 @@ public class SessionView extends JPanel {
         layout.putConstraint(SpringLayout.WEST, stuQuantityLabel, westLabel, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, stuQuantityLabel, 30, SpringLayout.NORTH, endYearLabel);
         layout.putConstraint(SpringLayout.WEST, teacherNameLabel, westLabel, SpringLayout.WEST, this);
-        layout.putConstraint(SpringLayout.NORTH, teacherNameLabel, 30, SpringLayout.NORTH, stuQuantityLabel);
+        layout.putConstraint(SpringLayout.NORTH, teacherNameLabel, 32, SpringLayout.NORTH, stuQuantityLabel);
 
         int westTextField = 150;
         int northTextField = 70;
@@ -303,7 +303,7 @@ public class SessionView extends JPanel {
         String teacherName = teacherComboBox.getSelectedItem().toString();
         if (teacherName.equals("")) {
             idField.requestFocus();
-            showMessage("Vui lòng chọn tên trưởng bộ môn");
+            showMessage("Vui lòng chọn tên giảng viên phụ trách khóa");
             return false;
         }
         return true;

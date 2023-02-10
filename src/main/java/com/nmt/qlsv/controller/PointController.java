@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -201,9 +202,20 @@ public class PointController {
         public void actionPerformed(ActionEvent e) {
             String filePath = pointView.chooseExcelFile();
             if (filePath != null) {
-                excelDao.importPointExcelToDatabase(filePath);
-                pointView.showListPoint(pointDao.findAll(null, null));
-                pointView.showMessage("Import thành công");
+                try
+                {
+                    excelDao.importPointExcelToDatabase(filePath);
+                    pointView.showListPoint(pointDao.findAll(null, null));
+                    pointView.showMessage("Import thành công");
+                }
+                catch (SQLException e1)
+                {
+                    pointView.showMessage("Sinh viên không tồn tại hoặc trùng điểm môn học");
+                }
+                catch (Exception e2)
+                {
+                    pointView.showMessage("Lỗi khi đọc file Excel");
+                }
             }
         }
     }

@@ -52,9 +52,9 @@ public class SubjectView extends JPanel {
         jScrollPaneTable.setPreferredSize(new Dimension(850, 700));
 
         idLabel = new JLabel("ID");
-        subjectNameLabel = new JLabel("Subject");
-        creditLabel = new JLabel("Credit");
-        teacherLabel = new JLabel("Teacher");
+        subjectNameLabel = new JLabel("Tên môn");
+        creditLabel = new JLabel("Số TC");
+        teacherLabel = new JLabel("GV bộ môn");
 
         searchLabel = new JLabel();
         searchLabel.setIcon(new ImageIcon("D:/Workspace/IntelliJ/qlsv-swing/src/main/resources/image/search-icon.png"));

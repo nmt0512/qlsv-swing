@@ -136,3 +136,5 @@ ADD ClassId int NULL
 UPDATE Session SET StuQuantity = 0
 
 UPDATE Point SET StudentId = 'CT040246', SubjectId = 1, Point1 = 7, Point2 = 7, PointFinal = 7, TotalPoint = 7 WHERE StudentId = 'CT040246', SubjectId = 1
+
+UPDATE Class SET StuQuantity = 1 WHERE Name = 'CT4A'

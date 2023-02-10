@@ -71,7 +71,7 @@ public class LoginView extends JFrame implements ActionListener {
 
     public User getUser() {
         return new User(userNameField.getText(), 
-                String.copyValueOf(passwordField.getPassword()));
+                String.valueOf(passwordField.getPassword()));
     }
 
     public void actionPerformed(ActionEvent e) {

@@ -38,7 +38,7 @@ public class PointDao {
         con = ConnectionDao.getConnection();
         if (!isUpdatingProcess)
             query = "INSERT INTO Point(Point1, Point2, PointFinal, TotalPoint, StudentId, SubjectId) " +
-                    "VALUES(?, ?, ? ,?, ?, ?)";
+                    "VALUES(?, ?, ?, ?, ?, ?)";
         else
             query = "UPDATE Point SET Point1 = ?, Point2 = ?, PointFinal = ?, " +
                     "TotalPoint = ? WHERE StudentId = ? AND SubjectId = ?";
@@ -73,7 +73,7 @@ public class PointDao {
             if (studentClass != null || subjectId != null) {
                 query += " WHERE ";
                 if (studentClass != null && subjectId != null)
-                    query += "StudentClass = '" + studentClass + "' AND SubjectId = " + subjectId;
+                    query += "cla.Name = '" + studentClass + "' AND sub.Id = " + subjectId;
                 else {
                     if (studentClass != null)
                         query += "cla.Name = '" + studentClass + "'";
@@ -150,7 +150,7 @@ public class PointDao {
     public void sortByTotalPoint() {
         Collections.sort(pointList, new Comparator<Point>() {
             public int compare(Point point1, Point point2) {
-                if (point1.getTotalPoint() > point2.getTotalPoint()) {
+                if (point1.getTotalPoint() < point2.getTotalPoint()) {
                     return 1;
                 }
                 return -1;

@@ -21,74 +21,66 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ExcelDao {
-    public void importStudentExcelToDatabase(String filePath) throws ParseException{
+    public void importStudentExcelToDatabase(String filePath) throws ParseException, SQLException, IOException {
         ClazzDao clazzDao = new ClazzDao();
         String excelFilePath = filePath;
-        try {
-            Connection con = ConnectionDao.getConnection();
-            con.setAutoCommit(false);
-            String query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Address, Hometown, ClassId) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement statement = con.prepareStatement(query);
+        Connection con = ConnectionDao.getConnection();
+        con.setAutoCommit(false);
+        String query = "INSERT INTO Student(StudentId, Name, Age, Birthday, Address, Hometown, ClassId) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement statement = con.prepareStatement(query);
 
-            FileInputStream inputStream = new FileInputStream(excelFilePath);
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
 
-            Workbook workbook = new XSSFWorkbook(inputStream);
+        Workbook workbook = new XSSFWorkbook(inputStream);
 
-            Sheet firstSheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = firstSheet.iterator();
-            rowIterator.next(); // skip the header row
-            while (rowIterator.hasNext()) {
-                Row nextRow = rowIterator.next();
-                Iterator<Cell> cellIterator = nextRow.cellIterator();
-                while (cellIterator.hasNext()) {
-                    Cell nextCell = cellIterator.next();
-                    int columnIndex = nextCell.getColumnIndex();
-                    switch (columnIndex) {
-                        case 0:
-                            String studentId = nextCell.getStringCellValue();
-                            statement.setString(1, studentId);
-                            break;
-                        case 1:
-                            String name = nextCell.getStringCellValue();
-                            statement.setString(2, name);
-                            break;
-                        case 2:
-                            Integer age = (int) nextCell.getNumericCellValue();
-                            statement.setInt(3, age);
-                            break;
-                        case 3:
-                            String birthday = nextCell.getStringCellValue();
-                            statement.setDate(4, stringToDate(birthday));
-                            break;
-                        case 4:
-                            String address = nextCell.getStringCellValue();
-                            statement.setString(5, address);
-                            break;
-                        case 5:
-                            String hometown = nextCell.getStringCellValue();
-                            statement.setString(6, hometown);
-                            break;
-                        case 6:
-                            String clazz = nextCell.getStringCellValue();
-                            Integer classId = clazzDao.findIdByName(clazz);
-                            statement.setInt(7, classId);
-                            break;
-                    }
+        Sheet firstSheet = workbook.getSheetAt(0);
+        Iterator<Row> rowIterator = firstSheet.iterator();
+        rowIterator.next(); // skip the header row
+        while (rowIterator.hasNext()) {
+            Row nextRow = rowIterator.next();
+            Iterator<Cell> cellIterator = nextRow.cellIterator();
+            while (cellIterator.hasNext()) {
+                Cell nextCell = cellIterator.next();
+                int columnIndex = nextCell.getColumnIndex();
+                switch (columnIndex) {
+                    case 0:
+                        String studentId = nextCell.getStringCellValue();
+                        statement.setString(1, studentId);
+                        break;
+                    case 1:
+                        String name = nextCell.getStringCellValue();
+                        statement.setString(2, name);
+                        break;
+                    case 2:
+                        Integer age = (int) nextCell.getNumericCellValue();
+                        statement.setInt(3, age);
+                        break;
+                    case 3:
+                        String birthday = nextCell.getStringCellValue();
+                        statement.setDate(4, stringToDate(birthday));
+                        break;
+                    case 4:
+                        String address = nextCell.getStringCellValue();
+                        statement.setString(5, address);
+                        break;
+                    case 5:
+                        String hometown = nextCell.getStringCellValue();
+                        statement.setString(6, hometown);
+                        break;
+                    case 6:
+                        String clazz = nextCell.getStringCellValue();
+                        Integer classId = clazzDao.findIdByName(clazz);
+                        statement.setInt(7, classId);
+                        break;
                 }
-                statement.addBatch();
-                statement.executeBatch();
             }
-            workbook.close();
-            con.commit();
-            con.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Add to database error");
-        } catch (FileNotFoundException e1) {
-            JOptionPane.showMessageDialog(null, "Error reading file");
-        } catch (IOException e2) {
-            JOptionPane.showMessageDialog(null, "Error reading file");
+            statement.addBatch();
+            statement.executeBatch();
         }
+        workbook.close();
+        con.commit();
+        con.close();
     }
 
     public void exportStudentDatabaseToExcel(List<Student> listStudent, List<String> listColumn)
@@ -98,8 +90,7 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Student Data ");
 
         XSSFRow row = spreadsheet.createRow(0);
-        for(int cellId = 0; cellId < listColumn.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < listColumn.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(listColumn.get(cellId));
         }
@@ -108,7 +99,7 @@ public class ExcelDao {
         // writing the data into the sheets...
         for (Student student : listStudent) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < Student.class.getDeclaredFields().length; cellId ++) {
+            for (int cellId = 0; cellId < Student.class.getDeclaredFields().length; cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -144,77 +135,62 @@ public class ExcelDao {
         out.close();
     }
 
-    public void importPointExcelToDatabase(String filePath) {
+    public void importPointExcelToDatabase(String filePath) throws SQLException, Exception {
         SubjectDao subjectDao = new SubjectDao();
         String excelFilePath = filePath;
-        try {
-            Connection con = ConnectionDao.getConnection();
-            con.setAutoCommit(false);
-            String query = "INSERT INTO Point(StudentId, SubjectId, Point1, Point2, PointFinal, TotalPoint) " +
-                    "VALUES(?, ?, ? , ?, ?, ?)";
-            PreparedStatement statement = con.prepareStatement(query);
+        Connection con = ConnectionDao.getConnection();
+        con.setAutoCommit(false);
+        String query = "INSERT INTO Point(StudentId, SubjectId, Point1, Point2, PointFinal, TotalPoint) " +
+                "VALUES(?, ?, ? , ?, ?, ?)";
+        PreparedStatement statement = con.prepareStatement(query);
 
-            FileInputStream inputStream = new FileInputStream(excelFilePath);
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
 
-            Workbook workbook = new XSSFWorkbook(inputStream);
+        Workbook workbook = new XSSFWorkbook(inputStream);
 
-            Sheet firstSheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = firstSheet.iterator();
-            rowIterator.next(); // skip the header row
-            while (rowIterator.hasNext()) {
-                Float point1 = Float.valueOf(0);
-                Float point2 = Float.valueOf(0);
-                Float pointFinal = Float.valueOf(0);
-                Row nextRow = rowIterator.next();
-                Iterator<Cell> cellIterator = nextRow.cellIterator();
-                while (cellIterator.hasNext()) {
-                    Cell nextCell = cellIterator.next();
-                    int columnIndex = nextCell.getColumnIndex();
-                    switch (columnIndex) {
-                        case 0:
-                            String studentId = nextCell.getStringCellValue();
-                            statement.setString(1, studentId);
-                            break;
-                        case 2:
-                            Integer subjectId = subjectDao.getSubjectIdBySubjectName(nextCell.getStringCellValue());
-                            statement.setInt(2, subjectId);
-                            break;
-                        case 3:
-                            point1 = (float) nextCell.getNumericCellValue();
-                            statement.setFloat(3, point1);
-                            break;
-                        case 4:
-                            point2 = (float) nextCell.getNumericCellValue();
-                            statement.setFloat(4, point2);
-                            break;
-                        case 5:
-                            pointFinal = (float) nextCell.getNumericCellValue();
-                            statement.setFloat(5, pointFinal);
-                            break;
-                    }
+        Sheet firstSheet = workbook.getSheetAt(0);
+        Iterator<Row> rowIterator = firstSheet.iterator();
+        rowIterator.next(); // skip the header row
+        while (rowIterator.hasNext()) {
+            float point1 = (float) 0;
+            float point2 = (float) 0;
+            float pointFinal = (float) 0;
+            Row nextRow = rowIterator.next();
+            Iterator<Cell> cellIterator = nextRow.cellIterator();
+            while (cellIterator.hasNext()) {
+                Cell nextCell = cellIterator.next();
+                int columnIndex = nextCell.getColumnIndex();
+                switch (columnIndex) {
+                    case 0:
+                        String studentId = nextCell.getStringCellValue();
+                        statement.setString(1, studentId);
+                        break;
+                    case 1:
+                        Integer subjectId = subjectDao.getSubjectIdBySubjectName(nextCell.getStringCellValue());
+                        statement.setInt(2, subjectId);
+                        break;
+                    case 2:
+                        point1 = (float) nextCell.getNumericCellValue();
+                        statement.setFloat(3, point1);
+                        break;
+                    case 3:
+                        point2 = (float) nextCell.getNumericCellValue();
+                        statement.setFloat(4, point2);
+                        break;
+                    case 4:
+                        pointFinal = (float) nextCell.getNumericCellValue();
+                        statement.setFloat(5, pointFinal);
+                        break;
                 }
-                statement.setFloat(6, (float)(point1 * 0.1 + point2 * 0.2 + pointFinal * 0.7));
-                statement.addBatch();
-                statement.executeBatch();
             }
-            workbook.close();
-            con.commit();
-            con.close();
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Add to database error");
-            e.printStackTrace();
-        } catch (FileNotFoundException e1) {
-            JOptionPane.showMessageDialog(null, "Error reading file");
-            e1.printStackTrace();
-        } catch (IOException e2) {
-            JOptionPane.showMessageDialog(null, "Error reading file");
-            e2.printStackTrace();
+            statement.setFloat(6, (float) (point1 * 0.1 + point2 * 0.2 + pointFinal * 0.7));
+            statement.addBatch();
+            statement.executeBatch();
         }
-        catch(Exception e3)
-        {
-            JOptionPane.showMessageDialog(null, "Error reading excel file");
-            e3.printStackTrace();
-        }
+        workbook.close();
+        con.commit();
+        con.close();
+
     }
 
     public void exportPointDatabaseToExcel(List<Point> listPoint, List<String> listColumn)
@@ -224,8 +200,7 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Point Data ");
 
         XSSFRow row = spreadsheet.createRow(0);
-        for(int cellId = 0; cellId < listColumn.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < listColumn.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(listColumn.get(cellId));
         }
@@ -234,7 +209,7 @@ public class ExcelDao {
         // writing the data into the sheets...
         for (Point point : listPoint) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < listColumn.size(); cellId ++) {
+            for (int cellId = 0; cellId < listColumn.size(); cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -272,8 +247,7 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Subject Data ");
         XSSFRow row = spreadsheet.createRow(0);
 
-        for(int cellId = 0; cellId < columnList.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < columnList.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(columnList.get(cellId));
         }
@@ -282,7 +256,7 @@ public class ExcelDao {
         // writing the data into the sheets...
         for (Subject subject : subjectList) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+            for (int cellId = 0; cellId < columnList.size(); cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -308,17 +282,16 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Teacher Data ");
         XSSFRow row = spreadsheet.createRow(0);
 
-        for(int cellId = 0; cellId < columnList.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < columnList.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(columnList.get(cellId));
         }
 
         int rowid = 1;
         // writing the data into the sheets...
-        for (Teacher teacher: teacherList) {
+        for (Teacher teacher : teacherList) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+            for (int cellId = 0; cellId < columnList.size(); cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -356,17 +329,16 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Session Data ");
         XSSFRow row = spreadsheet.createRow(0);
 
-        for(int cellId = 0; cellId < columnList.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < columnList.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(columnList.get(cellId));
         }
 
         int rowid = 1;
         // writing the data into the sheets...
-        for (Session session: sessionList) {
+        for (Session session : sessionList) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+            for (int cellId = 0; cellId < columnList.size(); cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -398,17 +370,16 @@ public class ExcelDao {
         XSSFSheet spreadsheet = workbook.createSheet(" Class Data ");
         XSSFRow row = spreadsheet.createRow(0);
 
-        for(int cellId = 0; cellId < columnList.size(); cellId ++)
-        {
+        for (int cellId = 0; cellId < columnList.size(); cellId++) {
             Cell cellColumn = row.createCell(cellId);
             cellColumn.setCellValue(columnList.get(cellId));
         }
 
         int rowid = 1;
         // writing the data into the sheets...
-        for (Clazz clazz: clazzList) {
+        for (Clazz clazz : clazzList) {
             row = spreadsheet.createRow(rowid++);
-            for (int cellId = 0; cellId < columnList.size(); cellId ++) {
+            for (int cellId = 0; cellId < columnList.size(); cellId++) {
                 Cell cell = row.createCell(cellId);
                 switch (cellId) {
                     case 0:
@@ -435,15 +406,14 @@ public class ExcelDao {
         out.close();
     }
 
-    private String dateToString(java.sql.Date date)
-    {
-        if(date != null)
-        {
+    private String dateToString(java.sql.Date date) {
+        if (date != null) {
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             return dateFormat.format(date);
         }
         return "";
     }
+
     private java.sql.Date stringToDate(String strDate) throws ParseException {
         java.util.Date utilDate = new SimpleDateFormat("dd/MM/yyyy").parse(strDate);
 // because PreparedStatement#setDate(..) expects a java.sql.Date argument

@@ -91,7 +91,6 @@ public class ChangingPasswordView extends JFrame {
             dto.setNewPassword(String.valueOf(newPasswordField.getPassword()));
             return dto;
         }
-        showMessage("Mật khẩu mới không trùng khớp");
         return null;
     }
 
@@ -100,7 +99,16 @@ public class ChangingPasswordView extends JFrame {
         String newPassword = String.valueOf(newPasswordField.getPassword());
         String retypedNewPassword = String.valueOf(retypedNewPasswordField.getPassword());
         if(newPassword.equals(retypedNewPassword))
+        {
+            String regex = "[A-Z]\\w{7,20}";
+            if(!newPassword.matches(regex))
+            {
+                showMessage("Mật khẩu phải bắt đầu bằng chữ hoa và có ít nhất 8 kí tự");
+                return false;
+            }
             return true;
+        }
+        showMessage("Mật khẩu mới không trùng khớp");
         return false;
     }
 
