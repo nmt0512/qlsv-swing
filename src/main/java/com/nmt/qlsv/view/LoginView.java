@@ -22,7 +22,7 @@ public class LoginView extends JFrame implements ActionListener {
 
     private void initComponents() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        userNameLabel = new JLabel("UserName");
+        userNameLabel = new JLabel("Username");
         passwordlabel = new JLabel("Password");
         userNameField = new JTextField(15);
         passwordField = new JPasswordField(15);

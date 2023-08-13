@@ -27,7 +27,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
     private JButton sortStudentNameBtn;
     private JButton chooseExcelFileBtn;
     private JButton exportToExcelBtn;
-//    private JButton showPointBtn;
+    //    private JButton showPointBtn;
     private JScrollPane jScrollPaneStudentTable;
     private JScrollPane jScrollPaneAddress;
     private JTable studentTable;
@@ -53,8 +53,8 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
     private JTextField hometownField;
 
     // define columns in student table
-    private final String [] columnNames = new String [] {"ID", "Mã SV", "Họ tên", "Tuổi", "Địa chỉ", "Ngày sinh", "Quê quán", "Lớp"};
-    private final Object data = new Object [][] {};
+    private final String[] columnNames = new String[]{"ID", "Mã SV", "Họ tên", "Tuổi", "Địa chỉ", "Ngày sinh", "Quê quán", "Lớp"};
+    private final Object data = new Object[][]{};
 
     public StudentView() {
         initComponents();
@@ -73,7 +73,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         // init student table
         jScrollPaneStudentTable = new JScrollPane();
         studentTable = new JTable();
-        
+
         // init label
         idLabel = new JLabel("ID");
         studentIdLabel = new JLabel("Mã SV");
@@ -90,7 +90,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
 
         classComboBox = new JComboBox<>();
         classComboBoxToUpdate = new JComboBox<>();
-        
+
         // init text field for student information
         idField = new JTextField((6));
         idField.setEditable(false);
@@ -108,14 +108,14 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
 
         studentTable.setModel(new DefaultTableModel((Object[][]) data, columnNames));
         jScrollPaneStudentTable.setViewportView(studentTable);
-        jScrollPaneStudentTable.setPreferredSize(new Dimension (850, 650));
+        jScrollPaneStudentTable.setPreferredSize(new Dimension(850, 650));
 
         SpringLayout layout = new SpringLayout();
-        
+
         this.setSize(1140, 800);
         this.setLayout(layout);
         this.add(jScrollPaneStudentTable);
-        
+
         this.add(addStudentBtn);
         this.add(editStudentBtn);
         this.add(deleteStudentBtn);
@@ -198,7 +198,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         layout.putConstraint(SpringLayout.NORTH, birthdayField, 33, SpringLayout.NORTH, classComboBoxToUpdate);
         layout.putConstraint(SpringLayout.WEST, hometownField, westTextField, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, hometownField, 30, SpringLayout.NORTH, birthdayField);
-        
+
         layout.putConstraint(SpringLayout.WEST, jScrollPaneStudentTable, 330, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, jScrollPaneStudentTable, 45, SpringLayout.NORTH, this);
 
@@ -238,30 +238,25 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         addStudentBtn.setEnabled(true);
     }
 
-    public void setDataForComboBox(List<String> listClassName)
-    {
+    public void setDataForComboBox(List<String> listClassName) {
         listClassName.add(0, "");
-        for(String className: listClassName)
-        {
+        for (String className : listClassName) {
             classComboBoxToUpdate.addItem(className);
         }
         listClassName.set(0, "All");
-        for(String className: listClassName)
-        {
+        for (String className : listClassName) {
             classComboBox.addItem(className);
         }
     }
 
-    public void refreshComboBoxData(List<String> listClassName)
-    {
+    public void refreshComboBoxData(List<String> listClassName) {
         classComboBox.removeAllItems();
         classComboBoxToUpdate.removeAllItems();
 
         setDataForComboBox(listClassName);
     }
 
-    public String chooseExcelFile()
-    {
+    public String chooseExcelFile() {
         JFileChooser jfc = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
         int returnValue = jfc.showOpenDialog(null);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
@@ -270,14 +265,14 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         }
         return null;
     }
-    
+
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(null, message);
     }
 
     public void showListStudents(List<Student> list) {
         int size = list.size();
-        Object [][] students = new Object[size][8];
+        Object[][] students = new Object[size][8];
         for (int i = 0; i < size; i++) {
             students[i][0] = list.get(i).getId();
             students[i][1] = list.get(i).getStudentId();
@@ -296,18 +291,18 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         // get all values of selected row
         int row = studentTable.getSelectedRow();
         if (row >= 0) {
-            idField.setText(studentTable.getModel().getValueAt(row,0).toString());
+            idField.setText(studentTable.getModel().getValueAt(row, 0).toString());
             studentIdField.setText(studentTable.getModel().getValueAt(row, 1).toString());
             nameField.setText(studentTable.getModel().getValueAt(row, 2).toString());
-            if(studentTable.getModel().getValueAt(row, 3) != null)
+            if (studentTable.getModel().getValueAt(row, 3) != null)
                 ageField.setText(studentTable.getModel().getValueAt(row, 3).toString());
-            if(studentTable.getModel().getValueAt(row, 4) != null)
+            if (studentTable.getModel().getValueAt(row, 4) != null)
                 addressTA.setText(studentTable.getModel().getValueAt(row, 4).toString());
-            if(studentTable.getModel().getValueAt(row, 5) != null)
+            if (studentTable.getModel().getValueAt(row, 5) != null)
                 birthdayField.setText(studentTable.getModel().getValueAt(row, 5).toString());
-            if(studentTable.getModel().getValueAt(row, 6) != null)
+            if (studentTable.getModel().getValueAt(row, 6) != null)
                 hometownField.setText(studentTable.getModel().getValueAt(row, 6).toString());
-            if(studentTable.getModel().getValueAt(row, 7) != null)
+            if (studentTable.getModel().getValueAt(row, 7) != null)
                 classComboBoxToUpdate.setSelectedItem(studentTable.getModel().getValueAt(row, 7).toString());
             // enable Edit and Delete buttons
             editStudentBtn.setEnabled(true);
@@ -362,7 +357,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         }
         try {
             Student student = new Student();
-            if(!idField.getText().isBlank())
+            if (!idField.getText().isBlank())
                 student.setId(Integer.parseInt(idField.getText()));
             student.setStudentId(studentIdField.getText());
             student.setName(nameField.getText().trim());
@@ -378,13 +373,13 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         return null;
     }
 
-    public String getClassSelectedFromComboBox()
-    {
-        if(classComboBox.getSelectedItem() != null)
+    public String getClassSelectedFromComboBox() {
+        if (classComboBox.getSelectedItem() != null)
             return classComboBox.getSelectedItem().toString();
         return null;
     }
-    public String getSearchedKey(){
+
+    public String getSearchedKey() {
         return searchField.getText();
     }
 
@@ -397,7 +392,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         }
         return true;
     }
-    
+
     private boolean validateName() {
         String name = nameField.getText();
         if (name == null || "".equals(name.trim())) {
@@ -407,7 +402,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         }
         return true;
     }
-    
+
     private boolean validateAddress() {
         String address = addressTA.getText();
         if (address == null || "".equals(address.trim())) {
@@ -417,7 +412,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         }
         return true;
     }
-    
+
     private boolean validateAge() {
         try {
             Integer age = Integer.parseInt(ageField.getText());
@@ -435,22 +430,19 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
     }
 
     private boolean validateBirthday() {
-            String date = birthdayField.getText();
-            String regex = "[0-3]\\d/[01]\\d/[12]\\d{3}";
-            if(date == null || "".equals(date.trim()) || !date.matches(regex))
-            {
-                birthdayField.requestFocus();
-                showMessage("Ngày sinh không hợp lệ, vui lòng nhập ngày sinh đúng dạng dd/MM/yyyy");
-                return false;
-            }
-            return true;
+        String date = birthdayField.getText();
+        String regex = "[0-3]\\d/[01]\\d/[12]\\d{3}";
+        if (date == null || "".equals(date.trim()) || !date.matches(regex)) {
+            birthdayField.requestFocus();
+            showMessage("Ngày sinh không hợp lệ, vui lòng nhập ngày sinh đúng dạng dd/MM/yyyy");
+            return false;
+        }
+        return true;
     }
 
-    private boolean validateClassName()
-    {
+    private boolean validateClassName() {
         String className = classComboBoxToUpdate.getSelectedItem().toString();
-        if(className.equals(""))
-        {
+        if (className.equals("")) {
             showMessage("Vui lòng chọn tên lớp");
             return false;
         }
@@ -464,10 +456,8 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         return sqlDate;
     }
 
-    private String dateToString(java.sql.Date date)
-    {
-        if(date != null)
-        {
+    private String dateToString(java.sql.Date date) {
+        if (date != null) {
             DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
             return dateFormat.format(date);
         }
@@ -476,26 +466,26 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
 
     public void actionPerformed(ActionEvent e) {
     }
-    
+
     public void valueChanged(ListSelectionEvent e) {
     }
-    
+
     public void addAddStudentListener(ActionListener listener) {
         addStudentBtn.addActionListener(listener);
     }
-    
-    public void addEdiStudentListener(ActionListener listener) {
+
+    public void addEditStudentListener(ActionListener listener) {
         editStudentBtn.addActionListener(listener);
     }
-    
+
     public void addDeleteStudentListener(ActionListener listener) {
         deleteStudentBtn.addActionListener(listener);
     }
-    
+
     public void addClearListener(ActionListener listener) {
         clearBtn.addActionListener(listener);
     }
-    
+
     public void addSortStudentNameListener(ActionListener listener) {
         sortStudentNameBtn.addActionListener(listener);
     }
@@ -512,8 +502,7 @@ public class StudentView extends JPanel implements ActionListener, ListSelection
         classComboBox.addActionListener(listener);
     }
 
-    public void addSearchFieldListener(KeyListener keyListener)
-    {
+    public void addSearchFieldListener(KeyListener keyListener) {
         searchField.addKeyListener(keyListener);
     }
 

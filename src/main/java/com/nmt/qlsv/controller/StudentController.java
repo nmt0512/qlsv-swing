@@ -36,7 +36,7 @@ public class StudentController {
         sessionDao.findAll();
 
         studentView.addAddStudentListener(new AddStudentListener());
-        studentView.addEdiStudentListener(new EditStudentListener());
+        studentView.addEditStudentListener(new EditStudentListener());
         studentView.addDeleteStudentListener(new DeleteStudentListener());
         studentView.addClearListener(new ClearStudentListener());
         studentView.addSortStudentNameListener(new SortStudentNameListener());
